@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TasteIt | Share Recipes with the World</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #fffaf4;
+  color: #333;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Navbar */
+.navbar {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 20px 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+}
+.logo {
+    
+  font-size: 28px;
+  color:#B0C364;
+}
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 25px;
+}
+.nav-links li a {
+  font-weight: 500;
+  padding: 5px 10px;
+  color: #fff;
+  text-decoration: none;
+  transition: 0.15s ease;
+}
+.nav-links li a:hover {
+  color:#B0C364;
+}
+
+/* Hero Slider */
+.hero-slider {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 60px; /* still keeps space for navbar */
+}
+
+/* Background Layers */
+.bg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 0.6s ease-in-out;
+  z-index: 0;
+  opacity: 0;
+}
+.layer1 {
+  z-index: 1;
+}
+.layer2 {
+  z-index: 2;
+}
+.bg-layer.active {
+  opacity: 1;
+}
+
+/* Hero Content */
+.hero-content {
+  z-index: 3;
+  text-align: center;
+  color: white;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+}
+.hero-content h2 {
+  font-size: 48px;
+  font-weight: 600;
+}
+.hero-content p {
+  font-size: 20px;
+  margin: 20px 0;
+}
+  .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color:#B0C364;
+    color: white;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: 0.15s ease;
+    text-decoration: none;
+  }
+  .btn:hover {
+    background-color: #B0C364;
+  }
+
+/* About Section */
+.about {
+  padding: 60px 0;
+  background-color: #fff8f0;
+  text-align: center;
+}
+.about h2 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color:#B0C364;
+}
+.about p {
+  max-width: 700px;
+  margin: auto;
+  font-size: 18px;
+  color: #444;
+}
+
+/* Featured Recipes */
+.featured {
+  padding: 60px 0;
+}
+.featured h2 {
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 40px;
+  color: #B0C364;
+}
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+}
+.recipe-card {
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+.recipe-card:hover {
+  transform: translateY(-5px);
+}
+.card-content {
+  padding: 15px;
+}
+.card-content h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+.card-content p {
+  font-size: 14px;
+  color: #666;
+}
+.actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 15px;
+}
+.actions i {
+  font-size: 18px;
+  color: #888;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+.actions i:hover {
+  color:#B0C364;
+}
+
+/* Footer */
+footer {
+  background-color: #333;
+  color: white;
+  padding: 25px 0;
+  text-align: center;
+}
+footer p {
+  margin-bottom: 10px;
+}
+.socials a {
+  margin: 0 8px;
+  color: white;
+  font-size: 18px;
+  transition: 0.3s ease;
+}
+.socials a:hover {
+  color:#B0C364;
+} 
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container nav-content">
+      <h1 class="logo">TasteIt</h1>
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#featured">Recipes</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section with Smooth Slideshow -->
+  <section class="hero-slider" id="home">
+    <div class="bg-layer layer1"></div>
+    <div class="bg-layer layer2"></div>
+    <div class="hero-content">
+      <h2>Welcome to Taste It</h2>
+      <p>Discover and share mouth-watering recipes loved by our community!</p>
+      <a href="#featured" class="btn">Explore Recipes</a>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about">
+    <div class="container">
+      <h2>What is Taste It?</h2>
+      <p>Taste It is a food-sharing platform where you can browse, post, and discover amazing recipes from home chefs around the world. Like, comment, and bookmark your favorites. Join the flavor journey!</p>
+    </div>
+  </section>
+
+  <!-- Featured Recipes -->
+  <section id="featured" class="featured">
+    <div class="container">
+      <h2>Top Recipes</h2>
+      <div class="recipe-grid">
+        <div class="recipe-card">
+          <img src="uploads/biryani.jpg" alt="Biryani">
+          <div class="card-content">
+            <h3>Hyderabadi Biryani</h3>
+            <p>Aromatic rice layered with spiced meat and fried onions.</p>
+            <div class="actions">
+              <i class="fa-regular fa-heart"></i>
+              <i class="fa-regular fa-bookmark"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Taste It. Built with ❤</p>
+      <div class="socials">
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-pinterest"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Slideshow Script -->
+  <script>
+    const images = [
+      'img/bg10.jpg',
+      'img/bg1.jpg',
+      'img/bg.jpg'
+    ];
+
+    const layer1 = document.querySelector('.layer1');
+    const layer2 = document.querySelector('.layer2');
+    let current = 0;
+    let showingLayer1 = true;
+
+    // Initial setup
+    layer1.style.backgroundImage = `url('${images[0]}')`;
+    layer1.classList.add('active');
+
+    setInterval(() => {
+      current = (current + 1) % images.length;
+      const nextImage = `url('${images[current]}')`;
+
+      if (showingLayer1) {
+        layer2.style.backgroundImage = nextImage;
+        layer2.classList.add('active');
+        layer1.classList.remove('active');
+      } else {
+        layer1.style.backgroundImage = nextImage;
+        layer1.classList.add('active');
+        layer2.classList.remove('active');
+      }
+
+      showingLayer1 = !showingLayer1;
+    }, 4000);
+  </script>
+
+</body>
+</html>
