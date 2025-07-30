@@ -1,9 +1,9 @@
 <?php
-// Show PHP errors for debugging
+session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Connect to database
+// DB Connection
 $conn = new mysqli("localhost", "root", "", "tasteit");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -16,35 +16,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
-    // Debugging output
-    echo "Received: $username | $email<br>";
-
-    // Check all fields
     if (empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
-        echo "All fields are required!";
-        exit();
+        die("All fields are required.");
     }
 
-    // Check if passwords match
     if ($password !== $confirm_password) {
-        echo "Passwords do not match!";
-        exit();
+        die("Passwords do not match.");
     }
 
-    // Hash the password
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    // Insert into users table
     $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
     if (!$stmt) {
-        echo "SQL Error: " . $conn->error;
-        exit();
+        die("SQL Error: " . $conn->error);
     }
 
     $stmt->bind_param("sss", $username, $email, $hashedPassword);
 
     if ($stmt->execute()) {
-        echo "✅ Registration successful! <a href='login.html'>Click here to login</a>";
+        $_SESSION['user_email'] = $email;
+        header("Location: dashboard.html");
+        exit();
     } else {
         echo "❌ Error: " . $stmt->error;
     }

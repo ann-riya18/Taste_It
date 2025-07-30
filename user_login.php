@@ -1,7 +1,5 @@
 <?php
 session_start();
-
-// Enable error reporting for debugging
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -11,13 +9,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle login
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
 
     if (empty($email) || empty($password)) {
-        die("❗ Please fill in all fields.");
+        die("Please fill in all fields.");
     }
 
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
@@ -29,17 +26,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $user = $result->fetch_assoc();
 
         if (password_verify($password, $user['password'])) {
-            // ✅ Store email in session for dashboard
-            $_SESSION['user_email'] = $user['email'];
-
-            // ✅ Redirect to user dashboard
+            $_SESSION['user_email'] = $email;
             header("Location: user_dashboard.php");
             exit();
         } else {
-            echo "<script>alert('❌ Incorrect password!'); window.history.back();</script>";
+            echo "Incorrect password.";
         }
     } else {
-        echo "<script>alert('❌ No user found with that email!'); window.history.back();</script>";
+        echo "No user found with that email.";
     }
 
     $stmt->close();
