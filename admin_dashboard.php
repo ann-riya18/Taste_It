@@ -8,21 +8,21 @@ if (!isset($_SESSION['admin_email'])) {
 $conn = new mysqli("localhost", "root", "", "tasteit");
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
-// Summary
 $userCount = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
 $chefCount = $conn->query("SELECT COUNT(DISTINCT user_id) AS chefs FROM recipes")->fetch_assoc()['chefs'];
+$totalRecipes = $conn->query("SELECT COUNT(*) AS total FROM recipes")->fetch_assoc()['total'];
+$activeContributors = $conn->query("SELECT COUNT(DISTINCT user_id) AS contributors FROM recipes")->fetch_assoc()['contributors'];
+
 $mostLiked = $conn->query("SELECT title, MAX(likes) AS likes FROM recipes")->fetch_assoc();
 $mostLikedTitle = $mostLiked['title'] ?? "N/A";
 $mostLikedLikes = $mostLiked['likes'] ?? 0;
 
-// Recent
 $recent = $conn->query("
   SELECT r.title, u.username, r.created_at 
   FROM recipes r JOIN users u ON r.user_id = u.id 
   ORDER BY r.created_at DESC LIMIT 5
 ");
 
-// Top Contributors
 $topUsers = $conn->query("
   SELECT u.username, COUNT(r.id) AS count 
   FROM users u JOIN recipes r ON u.id = r.user_id 
@@ -42,42 +42,48 @@ $topUsers = $conn->query("
       font-family: 'Poppins', sans-serif;
       display: flex;
       min-height: 100vh;
-      background: url('img/bg11.jpg') no-repeat center center/cover;
+      background: url('img/bg15.jpg') no-repeat center center/cover;
     }
 
     /* Sidebar */
     .sidebar {
-      width: 240px;
-      background-color: #fff;
+      width: 260px; /* widened from 240px */
+      background-color: #B0C364;
       padding: 30px 20px;
       border-right: 2px solid #f4f4f4;
       box-shadow: 2px 0 10px rgba(0,0,0,0.05);
     }
     .sidebar h2 {
       font-size: 22px;
-      color: #D7263D;
+      color: #fff;
       margin-bottom: 30px;
     }
     .sidebar a {
       display: block;
-      background-color: #ffc107;
+      background-color: #f9f9f9; /* off-white background */
       color: #000;
       font-weight: 600;
       padding: 12px 18px;
       margin-bottom: 15px;
       border-radius: 8px;
       text-decoration: none;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
+      white-space: nowrap; /* ensures single line */
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .sidebar a:hover {
-      background-color: #e0a800;
+      background-color: #ffffff;
+      transform: translateX(4px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
     /* Main Content */
     .main-content {
       flex: 1;
       padding: 40px;
-      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.4);
+      backdrop-filter: blur(5px);
     }
 
     .header {
@@ -104,6 +110,12 @@ $topUsers = $conn->query("
       border-radius: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
 
     .card h3 {
@@ -152,10 +164,10 @@ $topUsers = $conn->query("
   <!-- Sidebar -->
   <div class="sidebar">
     <h2>Admin Panel</h2>
-    <a href="recipe_requests.php">📥 Pending Recipes</a>
-    <a href="review_comments.php">💬 Moderate Comments</a>
-    <a href="graph_insights.php">📊 Graphical Insights</a>
-    <a href="admin_logout.php">🚪 Logout</a>
+    <a href="recipe_requests.php">Pending Recipes</a>
+    <a href="review_comments.php"> Moderate Comments</a>
+    <a href="graph_insights.php">Graphical Insights</a>
+    <a href="admin_logout.php"> Logout</a>
   </div>
 
   <!-- Main -->
@@ -177,6 +189,10 @@ $topUsers = $conn->query("
       <div class="card">
         <h3>👨‍🍳 Total Chefs</h3>
         <p><?php echo $chefCount; ?></p>
+      </div>
+      <div class="card">
+        <h3>🍽️ Total Recipes</h3>
+        <p><?php echo $totalRecipes; ?></p>
       </div>
     </div>
 
