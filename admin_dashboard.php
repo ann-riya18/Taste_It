@@ -47,7 +47,7 @@ $topUsers = $conn->query("
 
     /* Sidebar */
     .sidebar {
-      width: 260px; /* widened from 240px */
+      width: 260px;
       background-color: #B0C364;
       padding: 30px 20px;
       border-right: 2px solid #f4f4f4;
@@ -60,21 +60,22 @@ $topUsers = $conn->query("
     }
     .sidebar a {
       display: block;
-      background-color: #f9f9f9; /* off-white background */
-      color: #000;
+      background-color:rgba(255, 255, 255, 0.90);
+      color: #333; /* updated for readability */
       font-weight: 600;
       padding: 12px 18px;
       margin-bottom: 15px;
       border-radius: 8px;
       text-decoration: none;
       transition: all 0.3s ease;
-      white-space: nowrap; /* ensures single line */
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .sidebar a:hover {
-      background-color: #ffffff;
-      transform: translateX(4px);
+      background-color: #e3efc9; /* subtle hover tint */
+      color: #4B5F1F; /* matching theme text on hover */
+      transform: translateX(2px);
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
@@ -87,7 +88,7 @@ $topUsers = $conn->query("
     }
 
     .header {
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.90);
       padding: 20px 30px;
       border-radius: 10px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -95,22 +96,28 @@ $topUsers = $conn->query("
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
+      color:#5A6E2D;
     }
 
     .summary-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(4,1fr);
       gap: 25px;
       margin-bottom: 40px;
     }
 
     .card {
       background: #fff;
-      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start; /* align content at top */
+      text-align: center;
+      padding: 20px;
       border-radius: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      min-height: 220px;
+      position: relative;
     }
 
     .card:hover {
@@ -119,19 +126,22 @@ $topUsers = $conn->query("
     }
 
     .card h3 {
+      color: #333;
+      margin: 10px 0 0 0; /* keep title top aligned */
       font-size: 16px;
-      color: #888;
-      margin-bottom: 10px;
+      font-weight: 600;
+      width: 100%;
     }
 
     .card p {
-      font-size: 20px;
-      color: #D7263D;
+      margin-top: 40px; /* raise number upward */
+      font-size: 28px;
+      color: #5A6E2D; /* theme color replacing red */
       font-weight: 600;
     }
 
     .section {
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.90);
       padding: 25px;
       border-radius: 12px;
       margin-bottom: 30px;
@@ -139,7 +149,7 @@ $topUsers = $conn->query("
     }
 
     .section h3 {
-      color: #D7263D;
+      color: #5A6E2D; /* match theme */
       font-size: 18px;
       margin-bottom: 15px;
     }
