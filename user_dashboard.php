@@ -23,106 +23,195 @@ $profilePic = $row['profile_pic'] ?: 'uploads/default.png';
   <title>User Dashboard | Taste It</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
+ <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(to right, #fcfafa, #fdf7ee);
+  }
+
+  .sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #b0c364, #9fb050);
+    color: white;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+  }
+
+  .sidebar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 3px solid white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebar h3 {
+    font-size: 20px;
+    margin-bottom: 25px;
+    text-align: center;
+  }
+
+  .sidebar a {
+    text-decoration: none;
+    color: white;
+    width: 100%;
+    padding: 12px 15px;
+    margin: 6px 0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    transition: 0.3s;
+  }
+
+  .sidebar a i {
+    margin-right: 10px;
+  }
+
+  .sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .main {
+    flex: 1;
+    padding: 40px 60px;
+  }
+
+  .main h1 {
+    font-size: 36px;
+    color: #D7263D;
+    margin-bottom: 10px;
+  }
+
+  .main h3 {
+    font-size: 20px;
+    color: #555;
+    margin-bottom: 40px;
+  }
+
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+  }
+
+  .dashboard-cards a {
+    background: linear-gradient(135deg, #fefefe, #f8f8f8);
+    border-radius: 16px;
+    padding: 22px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-cards a::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%; width: 100%;
+    background: linear-gradient(135deg, #b0c364, #a0b85a);
+    opacity: 0.06;
+    z-index: 0;
+  }
+
+  .dashboard-cards a i {
+    font-size: 22px;
+    margin-right: 12px;
+    color: #B0C364;
+    z-index: 1;
+  }
+
+  .dashboard-cards a span {
+    z-index: 1;
+  }
+
+  .dashboard-cards a:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  }
+
+  @media(max-width: 768px) {
     body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      background: #fff8f0;
+      flex-direction: column;
     }
 
-    .navbar {
-      background-color: #B0C364;
-      color: white;
-      padding: 15px 30px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .sidebar {
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-around;
+      padding: 15px;
+      border-radius: 0;
     }
 
-    .navbar .profile {
-      display: flex;
-      align-items: center;
+    .sidebar img, .sidebar h3 {
+      display: none;
     }
 
-    .navbar img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 10px;
+    .sidebar a {
+      font-size: 14px;
+      padding: 10px;
+      margin: 0 5px;
     }
 
-    .navbar a {
-      color: white;
-      margin-left: 20px;
-      text-decoration: none;
-      font-weight: 600;
+    .main {
+      padding: 20px;
     }
 
-    .container {
-      padding: 40px;
-      text-align: center;
+    .main h1 {
+      font-size: 28px;
     }
 
-    .dashboard-options {
-      margin-top: 30px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
+    .main h3 {
+      font-size: 16px;
     }
+  }
+</style>
 
-    .dashboard-options a {
-      background-color: #ffc107;
-      padding: 15px 25px;
-      border-radius: 10px;
-      text-decoration: none;
-      color: #000;
-      font-weight: 600;
-      transition: 0.3s;
-    }
-
-    .dashboard-options a:hover {
-      background-color: #e0a800;
-    }
-
-    h1 {
-      color: #D7263D;
-      margin-bottom: 10px;
-    }
-
-    h3 {
-      color: #555;
-    }
-  </style>
 </head>
 <body>
 
-  <div class="navbar">
-    <div class="profile">
-      <img src="<?php echo $profilePic; ?>" alt="Profile Picture">
-      <span>Welcome, <?php echo htmlspecialchars($username); ?></span>
-    </div>
-    <div>
-      <a href="index.html">Home</a>
-      <a href="logout.php">Logout</a>
-    </div>
+  <div class="sidebar">
+    <img src="<?php echo $profilePic; ?>" alt="Profile Picture">
+    <h3>Welcome, <?php echo htmlspecialchars($username); ?></h3>
+    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
   </div>
 
-  <div class="container">
+  <div class="main">
     <h1>User Dashboard</h1>
     <h3>What would you like to do today?</h3>
 
-    <div class="dashboard-options">
-      <a href="upload_recipe.php">📤 Upload Recipe</a>
-      <a href="search_recipes.php">🔍 Search Recipes</a>
-      <a href="search_chefs.php">👨‍🍳 Find Chefs</a>
-      <a href="liked_recipes.php">❤️ Liked Recipes</a>
-      <a href="bookmarked_recipes.php">🔖 Bookmarked Recipes</a>
-      <a href="my_recipes.php">📚 My Recipes</a>
-      <a href="my_comments.php">💬 My Comments</a>
-      <a href="edit_profile.php">🖊️ Edit Profile</a>
-
+    <div class="dashboard-cards">
+      <a href="upload_recipe.php"><i class="fas fa-upload"></i> Upload Recipe</a>
+      <a href="search_recipes.php"><i class="fas fa-search"></i> Search Recipes</a>
+      <a href="search_chefs.php"><i class="fas fa-user-friends"></i> Find Chefs</a>
+      <a href="liked_recipes.php"><i class="fas fa-heart"></i> Liked Recipes</a>
+      <a href="bookmarked_recipes.php"><i class="fas fa-bookmark"></i> Bookmarked Recipes</a>
+      <a href="my_recipes.php"><i class="fas fa-book"></i> My Recipes</a>
+      <a href="my_comments.php"><i class="fas fa-comment-dots"></i> My Comments</a>
+      <a href="edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a>
     </div>
   </div>
 
