@@ -8,24 +8,31 @@ if (!isset($_SESSION['admin_email'])) {
 $conn = new mysqli("localhost", "root", "", "tasteit");
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
+// Stats
 $userCount = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
-$chefCount = $conn->query("SELECT COUNT(DISTINCT user_id) AS chefs FROM recipes")->fetch_assoc()['chefs'];
-$totalRecipes = $conn->query("SELECT COUNT(*) AS total FROM recipes")->fetch_assoc()['total'];
-$activeContributors = $conn->query("SELECT COUNT(DISTINCT user_id) AS contributors FROM recipes")->fetch_assoc()['contributors'];
+$chefCount = $conn->query("SELECT COUNT(DISTINCT user_id) AS chefs FROM recipes WHERE status='approved'")->fetch_assoc()['chefs'];
+$approvedRecipes = $conn->query("SELECT COUNT(*) AS total FROM recipes WHERE status='approved'")->fetch_assoc()['total'];
+$pendingRecipes = $conn->query("SELECT COUNT(*) AS total FROM recipes WHERE status='pending'")->fetch_assoc()['total'];
+$declinedRecipes = $conn->query("SELECT COUNT(*) AS total FROM recipes WHERE status='declined'")->fetch_assoc()['total'];
 
-$mostLiked = $conn->query("SELECT title, MAX(likes) AS likes FROM recipes")->fetch_assoc();
+// Most liked from approved
+$mostLiked = $conn->query("SELECT title, likes FROM recipes WHERE status='approved' ORDER BY likes DESC LIMIT 1")->fetch_assoc();
 $mostLikedTitle = $mostLiked['title'] ?? "N/A";
 $mostLikedLikes = $mostLiked['likes'] ?? 0;
 
+// Recent approved activity
 $recent = $conn->query("
   SELECT r.title, u.username, r.created_at 
   FROM recipes r JOIN users u ON r.user_id = u.id 
+  WHERE r.status = 'approved'
   ORDER BY r.created_at DESC LIMIT 5
 ");
 
+// Top contributors from approved
 $topUsers = $conn->query("
   SELECT u.username, COUNT(r.id) AS count 
   FROM users u JOIN recipes r ON u.id = r.user_id 
+  WHERE r.status = 'approved'
   GROUP BY u.id ORDER BY count DESC LIMIT 3
 ");
 ?>
@@ -45,7 +52,6 @@ $topUsers = $conn->query("
       background: url('img/bg15.jpg') no-repeat center center/cover;
     }
 
-    /* Sidebar */
     .sidebar {
       width: 260px;
       background-color: #B0C364;
@@ -61,25 +67,21 @@ $topUsers = $conn->query("
     .sidebar a {
       display: block;
       background-color:rgba(255, 255, 255, 0.90);
-      color: #333; /* updated for readability */
+      color: #333;
       font-weight: 600;
       padding: 12px 18px;
       margin-bottom: 15px;
       border-radius: 8px;
       text-decoration: none;
       transition: all 0.3s ease;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
     .sidebar a:hover {
-      background-color: #e3efc9; /* subtle hover tint */
-      color: #4B5F1F; /* matching theme text on hover */
+      background-color: #e3efc9;
+      color: #4B5F1F;
       transform: translateX(2px);
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    /* Main Content */
     .main-content {
       flex: 1;
       padding: 40px;
@@ -101,7 +103,7 @@ $topUsers = $conn->query("
 
     .summary-cards {
       display: grid;
-      grid-template-columns: repeat(4,1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 25px;
       margin-bottom: 40px;
     }
@@ -111,13 +113,12 @@ $topUsers = $conn->query("
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start; /* align content at top */
+      justify-content: flex-start;
       text-align: center;
       padding: 20px;
       border-radius: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       min-height: 220px;
-      position: relative;
     }
 
     .card:hover {
@@ -127,16 +128,15 @@ $topUsers = $conn->query("
 
     .card h3 {
       color: #333;
-      margin: 10px 0 0 0; /* keep title top aligned */
+      margin: 10px 0 0 0;
       font-size: 16px;
       font-weight: 600;
-      width: 100%;
     }
 
     .card p {
-      margin-top: 40px; /* raise number upward */
+      margin-top: 40px;
       font-size: 28px;
-      color: #5A6E2D; /* theme color replacing red */
+      color: #5A6E2D;
       font-weight: 600;
     }
 
@@ -149,7 +149,7 @@ $topUsers = $conn->query("
     }
 
     .section h3 {
-      color: #5A6E2D; /* match theme */
+      color: #5A6E2D;
       font-size: 18px;
       margin-bottom: 15px;
     }
@@ -171,16 +171,14 @@ $topUsers = $conn->query("
 </head>
 <body>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <h2>Admin Panel</h2>
     <a href="recipe_requests.php">Pending Recipes</a>
-    <a href="review_comments.php"> Moderate Comments</a>
+    <a href="review_comments.php">Moderate Comments</a>
     <a href="graph_insights.php">Graphical Insights</a>
-    <a href="admin_logout.php"> Logout</a>
+    <a href="admin_logout.php">Logout</a>
   </div>
 
-  <!-- Main -->
   <div class="main-content">
     <div class="header">
       <h2>Welcome to Admin Dashboard</h2>
@@ -201,8 +199,16 @@ $topUsers = $conn->query("
         <p><?php echo $chefCount; ?></p>
       </div>
       <div class="card">
-        <h3>🍽️ Total Recipes</h3>
-        <p><?php echo $totalRecipes; ?></p>
+        <h3>🍽️ Approved Recipes</h3>
+        <p><?php echo $approvedRecipes; ?></p>
+      </div>
+      <div class="card">
+        <h3>⏳ Pending Recipes</h3>
+        <p><?php echo $pendingRecipes; ?></p>
+      </div>
+      <div class="card">
+        <h3>❌ Declined Recipes</h3>
+        <p><?php echo $declinedRecipes; ?></p>
       </div>
     </div>
 
