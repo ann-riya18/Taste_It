@@ -119,11 +119,15 @@ $topUsers = $conn->query("
       border-radius: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       min-height: 220px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
     }
 
     .card:hover {
       transform: translateY(-5px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      background-color: #f9f9f9;
     }
 
     .card h3 {
@@ -190,26 +194,26 @@ $topUsers = $conn->query("
         <h3>⭐ Most Liked Recipe</h3>
         <p><?php echo htmlspecialchars($mostLikedTitle) . " ($mostLikedLikes likes)"; ?></p>
       </div>
-      <div class="card">
-        <h3>👥 Total Users</h3>
-        <p><?php echo $userCount; ?></p>
-      </div>
-      <div class="card">
-        <h3>👨‍🍳 Total Chefs</h3>
-        <p><?php echo $chefCount; ?></p>
-      </div>
-      <div class="card">
+      <a href="approved_recipes.php" class="card">
         <h3>🍽️ Approved Recipes</h3>
         <p><?php echo $approvedRecipes; ?></p>
-      </div>
-      <div class="card">
+      </a>
+      <a href="pending_recipes.php" class="card">
         <h3>⏳ Pending Recipes</h3>
         <p><?php echo $pendingRecipes; ?></p>
-      </div>
-      <div class="card">
+      </a>
+      <a href="declined_recipes.php" class="card">
         <h3>❌ Declined Recipes</h3>
         <p><?php echo $declinedRecipes; ?></p>
-      </div>
+      </a>
+      <a href="total_users.php" class="card">
+        <h3>👥 Total Users</h3>
+        <p><?php echo $userCount; ?></p>
+      </a>
+      <a href="declined_recipes.php" class="card">
+        <h3>👨‍🍳 Total Chefs</h3>
+        <p><?php echo $chefCount; ?></p>
+      </a>
     </div>
 
     <div class="section">
