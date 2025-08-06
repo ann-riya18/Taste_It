@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($stmt->execute()) {
         $_SESSION['user_email'] = $email;
-        header("Location: dashboard.html");
+        header("Location: user_dashboard.php");
         exit();
     } else {
         echo "❌ Error: " . $stmt->error;
