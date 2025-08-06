@@ -1,219 +1,207 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_email'])) {
-  header("Location: user_login.html");
-  exit();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: user_login.php");
+    exit();
 }
 
 $conn = new mysqli("localhost", "root", "", "tasteit");
 if ($conn->connect_error) {
-  die("Connection failed: " . $conn->connect_error);
+    die("Connection failed: " . $conn->connect_error);
 }
 
-$email = $_SESSION['user_email'];
-$result = $conn->query("SELECT username, profile_pic FROM users WHERE email = '$email'");
-$row = $result->fetch_assoc();
-$username = $row['username'];
-$profilePic = $row['profile_pic'] ?: 'uploads/default.png';
+$user_email = $_SESSION['user_email'];
+
+$query = "SELECT username, profile_pic FROM users WHERE email = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $user_email);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result && $result->num_rows === 1) {
+    $user = $result->fetch_assoc();
+    $username = $user['username'];
+    $profileImage = !empty($user['profile_pic']) ? $user['profile_pic'] : 'uploads/default.jpg';
+} else {
+    session_destroy();
+    header("Location: user_login.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Dashboard | Taste It</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
- <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
 
-  body {
-    font-family: 'Poppins', sans-serif;
-    display: flex;
-    min-height: 100vh;
-    background: linear-gradient(to right, #fcfafa, #fdf7ee);
-  }
-
-  .sidebar {
-    width: 260px;
-    background: linear-gradient(180deg, #b0c364, #9fb050);
-    color: white;
-    padding: 30px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
-  }
-
-  .sidebar img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 15px;
-    border: 3px solid white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-  }
-
-  .sidebar h3 {
-    font-size: 20px;
-    margin-bottom: 25px;
-    text-align: center;
-  }
-
-  .sidebar a {
-    text-decoration: none;
-    color: white;
-    width: 100%;
-    padding: 12px 15px;
-    margin: 6px 0;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    font-weight: 500;
-    transition: 0.3s;
-  }
-
-  .sidebar a i {
-    margin-right: 10px;
-  }
-
-  .sidebar a:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .main {
-    flex: 1;
-    padding: 40px 60px;
-  }
-
-  .main h1 {
-    font-size: 36px;
-    color: #D7263D;
-    margin-bottom: 10px;
-  }
-
-  .main h3 {
-    font-size: 20px;
-    color: #555;
-    margin-bottom: 40px;
-  }
-
-  .dashboard-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 25px;
-  }
-
-  .dashboard-cards a {
-    background: linear-gradient(135deg, #fefefe, #f8f8f8);
-    border-radius: 16px;
-    padding: 22px;
-    text-decoration: none;
-    color: #333;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    border: none;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .dashboard-cards a::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    height: 100%; width: 100%;
-    background: linear-gradient(135deg, #b0c364, #a0b85a);
-    opacity: 0.06;
-    z-index: 0;
-  }
-
-  .dashboard-cards a i {
-    font-size: 22px;
-    margin-right: 12px;
-    color: #B0C364;
-    z-index: 1;
-  }
-
-  .dashboard-cards a span {
-    z-index: 1;
-  }
-
-  .dashboard-cards a:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  }
-
-  @media(max-width: 768px) {
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
     body {
-      flex-direction: column;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      background: #fefaf3;
     }
 
     .sidebar {
-      width: 100%;
-      flex-direction: row;
-      justify-content: space-around;
-      padding: 15px;
-      border-radius: 0;
+      width: 240px;
+      background-color: #B0C364;
+      color: white;
+      min-height: 100vh;
+      padding: 30px 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+
+    .profile-pic {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+      border: 3px solid white;
     }
 
-    .sidebar img, .sidebar h3 {
-      display: none;
+    .welcome {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 30px;
+      font-weight: 600;
     }
 
     .sidebar a {
-      font-size: 14px;
-      padding: 10px;
-      margin: 0 5px;
+      text-decoration: none;
+      color: #f9f9f9;
+      padding: 12px 15px;
+      margin: 8px 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .sidebar a i {
+      margin-right: 10px;
+    }
+
+    .sidebar a:hover {
+      background-color: #a2b759;
+      color: #fff;
     }
 
     .main {
-      padding: 20px;
+      flex-grow: 1;
+      padding: 40px 60px;
     }
 
-    .main h1 {
-      font-size: 28px;
+    .main h2 {
+      color: #c93e4f;
+      font-size: 32px;
+      margin-bottom: 10px;
     }
 
-    .main h3 {
+    .main p {
+      font-size: 18px;
+      margin-bottom: 40px;
+      color: #333;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 30px;
+    }
+    .card-container a 
+    {
+       text-decoration: none;
+       color: inherit;
+       display: block;           /* Important: Makes <a> behave like a block */
+    }
+
+
+    .card {
+      background-color: #d8ded8ff;
+      border-radius: 18px;
+      padding: 30px 20px;
+      text-align: center;
+      color: #333;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .card i {
+      font-size: 32px;
+      color: #B0C364;
+      margin-bottom: 12px;
+    }
+
+    .card p {
       font-size: 16px;
+      font-weight: 500;
     }
-  }
-</style>
-
+  </style>
 </head>
 <body>
 
   <div class="sidebar">
-    <img src="<?php echo $profilePic; ?>" alt="Profile Picture">
-    <h3>Welcome, <?php echo htmlspecialchars($username); ?></h3>
-    <a href="index.html"><i class="fas fa-home"></i> Home</a>
-    <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+     <img src="<?php echo htmlspecialchars($profileImage); ?>" 
+     alt="Profile" class="profile-pic"
+     onerror="this.src='https://via.placeholder.com/100'">
+   
+
+     <div class="welcome">Welcome,<br><?php echo htmlspecialchars($user['username']); ?></div>
+     <a href="index.html"><i class="fas fa-home"></i>Home</a>
+     <a href="search_recipes.php"><i class="fas fa-search"></i>Search Recipes</a>
+     <a href="find_chefs.php"><i class="fas fa-user-friends"></i>Find Chefs</a>
+     <a href="recipe_analytics.php"><i class="fas fa-chart-line"></i>My Recipe Analytics</a>
+     <a href="edit_profile.php"><i class="fas fa-user-edit"></i>Edit Profile</a>
+     <a href="logout.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
+
   </div>
 
   <div class="main">
-    <h1>User Dashboard</h1>
-    <h3>What would you like to do today?</h3>
-
-    <div class="dashboard-cards">
-      <a href="upload_recipe.php"><i class="fas fa-upload"></i> Upload Recipe</a>
-      <a href="search_recipes.php"><i class="fas fa-search"></i> Search Recipes</a>
-      <a href="search_chefs.php"><i class="fas fa-user-friends"></i> Find Chefs</a>
-      <a href="liked_recipes.php"><i class="fas fa-heart"></i> Liked Recipes</a>
-      <a href="bookmarked_recipes.php"><i class="fas fa-bookmark"></i> Bookmarked Recipes</a>
-      <a href="my_recipes.php"><i class="fas fa-book"></i> My Recipes</a>
-      <a href="my_comments.php"><i class="fas fa-comment-dots"></i> My Comments</a>
-      <a href="edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a>
-    </div>
-  </div>
+    <h2>User Dashboard</h2>
+    <p>What would you like to do today?</p>
+    <!-- CARD CONTAINER WITH REDIRECTION LINKS -->
+<div class="card-container">
+  <a href="upload_recipe.php" class="card">
+    <i class="fas fa-upload"></i>
+    <p>Upload Recipe</p>
+  </a>
+  <a href="bookmarked_recipes.php" class="card">
+    <i class="fas fa-bookmark"></i>
+    <p>Bookmarked Recipes</p>
+  </a>
+  <a href="my_recipes.php" class="card">
+    <i class="fas fa-utensils"></i>
+    <p>My Recipes</p>
+  </a>
+  <a href="liked_recipes.php" class="card">
+    <i class="fas fa-heart"></i>
+    <p>Liked Recipes</p>
+  </a>
+  <a href="badges.php" class="card">
+    <i class="fas fa-award"></i>
+    <p>Badges</p>
+  </a>
+  <a href="my_comments.php" class="card">
+    <i class="fas fa-comment-dots"></i>
+    <p>My Comments</p>
+  </a>
+</div>
+</div>
+   
 
 </body>
 </html>
