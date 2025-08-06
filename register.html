@@ -7,12 +7,9 @@
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
-    /* your existing CSS remains unchanged */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Poppins', sans-serif;
@@ -47,7 +44,9 @@
       font-weight: 600;
       color: #B0C364;
     }
-    .input-wrapper { position: relative; }
+    .input-wrapper {
+      position: relative;
+    }
     .input-wrapper input {
       width: 100%;
       padding: 12px 40px 12px 12px;
@@ -96,8 +95,7 @@
   <div class="register-container">
     <h2>Create Your TasteIt Account</h2>
 
-    <!-- ✅ START FORM -->
-    <form action="register.php" method="POST">
+    <form action="register.php" method="POST" enctype="multipart/form-data">
       <div class="form-group">
         <label for="name"><i class="fas fa-user form-icon"></i> Full Name</label>
         <div class="input-wrapper">
@@ -128,9 +126,16 @@
         </div>
       </div>
 
+      <!-- ✅ New profile picture upload field -->
+      <div class="form-group">
+        <label for="profile_pic"><i class="fas fa-image form-icon"></i> Profile Picture</label>
+        <div class="input-wrapper">
+          <input type="file" id="profile_pic" name="profile_pic" accept="image/*">
+        </div>
+      </div>
+
       <button type="submit" class="btn-register">Register</button>
     </form>
-    <!-- ✅ END FORM -->
 
     <div class="login-link">
       <span>Already have an account? </span><a href="user_login.html">Login</a>
