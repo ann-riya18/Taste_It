@@ -21,7 +21,11 @@ $result = $stmt->get_result();
 if ($result && $result->num_rows === 1) {
     $user = $result->fetch_assoc();
     $username = $user['username'];
-    $profileImage = !empty($user['profile_pic']) ? $user['profile_pic'] : 'uploads/default.jpg';
+    $profileImage = !empty($user['profile_pic']) 
+    ? $user['profile_pic'] 
+    : 'uploads/user_images/default.jpg';
+
+
 } else {
     session_destroy();
     header("Location: user_login.php");
