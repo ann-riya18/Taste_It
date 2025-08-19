@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: user_login.php");
     exit();
@@ -170,7 +171,7 @@ if ($result && $result->num_rows === 1) {
      <a href="find_chefs.php"><i class="fas fa-user-friends"></i>Find Chefs</a>
      <a href="recipe_analytics.php"><i class="fas fa-chart-line"></i>My Recipe Analytics</a>
      <a href="edit_profile.php"><i class="fas fa-user-edit"></i>Edit Profile</a>
-     <a href="logout.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
+     <a href="user_logout.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
 
   </div>
 
