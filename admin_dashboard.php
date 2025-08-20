@@ -190,10 +190,11 @@ $topUsers = $conn->query("
     </div>
 
     <div class="summary-cards">
-      <div class="card">
-        <h3>⭐ Most Liked Recipe</h3>
-        <p><?php echo htmlspecialchars($mostLikedTitle) . " ($mostLikedLikes likes)"; ?></p>
-      </div>
+    <a href="most_liked_recipe.php" class="card">
+  <h3>⭐ Most Liked Recipe</h3>
+  <p><?php echo htmlspecialchars($mostLikedTitle) . " ($mostLikedLikes likes)"; ?></p>
+</a>
+
       <a href="approved_recipes.php" class="card">
         <h3>🍽️ Approved Recipes</h3>
         <p><?php echo $approvedRecipes; ?></p>
@@ -210,14 +211,16 @@ $topUsers = $conn->query("
         <h3>👥 Total Users</h3>
         <p><?php echo $userCount; ?></p>
       </a>
-      <a href="declined_recipes.php" class="card">
+      <a href="total_chefs.php" class="card">
         <h3>👨‍🍳 Total Chefs</h3>
         <p><?php echo $chefCount; ?></p>
       </a>
     </div>
 
     <div class="section">
+      <a href="recent_activity.php" class="card">
       <h3>🕒 Recent Activity</h3>
+      </a>
       <ul>
         <?php while ($row = $recent->fetch_assoc()): ?>
           <li><strong><?php echo htmlspecialchars($row['username']); ?></strong> uploaded <em><?php echo htmlspecialchars($row['title']); ?></em> on <?php echo date("M d, Y H:i", strtotime($row['created_at'])); ?></li>
