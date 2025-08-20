@@ -32,16 +32,41 @@ $result = $conn->query($sql);
 <head>
   <title>Pending Recipes</title>
   <style>
-    body { font-family: 'Poppins', sans-serif; padding: 30px; background-color: #fdfaf5; }
-    .recipe {
-      background: #fff; padding: 20px; margin-bottom: 25px;
-      border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    body { 
+      font-family: 'Poppins', sans-serif; 
+      padding: 30px; 
+      background-color: #fdfaf5; 
     }
-    .recipe img { max-width: 100%; border-radius: 10px; margin-top: 10px; }
     h2 { color: #B05D57; }
+
+    .recipe {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .recipe-details {
+      flex: 2;
+    }
+
+    .recipe img {
+      flex: 1;
+      max-width: 40%;        /* image takes about 40% of the card width */
+      border-radius: 10px;
+      object-fit: cover;     /* makes sure it fills space */
+    }
+
     .actions a {
-      text-decoration: none; padding: 8px 16px; margin-right: 10px;
-      border-radius: 6px; font-weight: 600;
+      text-decoration: none;
+      padding: 8px 16px;
+      margin-right: 10px;
+      border-radius: 6px;
+      font-weight: 600;
     }
     .approve { background: #28a745; color: #fff; }
     .decline { background: #dc3545; color: #fff; }
@@ -54,18 +79,22 @@ $result = $conn->query($sql);
 <?php if ($result->num_rows > 0): ?>
   <?php while ($row = $result->fetch_assoc()): ?>
     <div class="recipe">
-      <h3><?php echo htmlspecialchars($row['title']); ?></h3>
-      <p><strong>By:</strong> <?php echo htmlspecialchars($row['username']); ?></p>
-      <p><strong>Category:</strong> <?php echo htmlspecialchars($row['category']); ?></p>
-      <p><strong>Ingredients:</strong><br><?php echo nl2br(htmlspecialchars($row['ingredients'])); ?></p>
-      <p><strong>Steps:</strong><br><?php echo nl2br(htmlspecialchars($row['steps'])); ?></p>
+      <div class="recipe-details">
+        <h3><?php echo htmlspecialchars($row['title']); ?></h3>
+        <p><strong>By:</strong> <?php echo htmlspecialchars($row['username']); ?></p>
+        <p><strong>Category:</strong> <?php echo htmlspecialchars($row['category']); ?></p>
+        <p><strong>Ingredients:</strong><br><?php echo nl2br(htmlspecialchars($row['ingredients'])); ?></p>
+        <p><strong>Steps:</strong><br><?php echo nl2br(htmlspecialchars($row['steps'])); ?></p>
+        
+        <div class="actions">
+          <a href="?action=approve&id=<?php echo $row['id']; ?>" class="approve">Approve</a>
+          <a href="?action=decline&id=<?php echo $row['id']; ?>" class="decline">Decline</a>
+        </div>
+      </div>
+
       <?php if (!empty($row['image_path'])): ?>
         <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
       <?php endif; ?>
-      <div class="actions">
-        <a href="?action=approve&id=<?php echo $row['id']; ?>" class="approve">Approve</a>
-        <a href="?action=decline&id=<?php echo $row['id']; ?>" class="decline">Decline</a>
-      </div>
     </div>
   <?php endwhile; ?>
 <?php else: ?>
