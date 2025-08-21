@@ -30,13 +30,29 @@ $result = $conn->query($sql);
     .transparent-header nav ul li a:hover{color:#B0C364}
 
     /* HERO */
-    .hero{height:100vh;display:flex;justify-content:center;align-items:center}
-    .hero-content{background:rgba(176,195,100,0.8);padding:20px 40px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.3);text-align:center;z-index:2}
+    .hero{height:100vh;position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden}
+    .hero video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
+    .hero::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:2}
+    .hero-content{position:relative;z-index:3;background:rgba(176,195,100,0.8);padding:20px 40px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.3);text-align:center}
     .hero-content h2{color:#fff;font-size:50px;font-weight:bold}
-    .slideshow{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
-    .slide{display:none;width:100%;height:100%}
-    .slide img{width:100%;height:100%;object-fit:cover}
-
+    .hero-content p {
+    color: #fff;
+    font-size: 18px;
+    margin: 15px 0;
+}
+.hero-content .btn {
+    display: inline-block;
+    padding: 12px 28px;
+    background-color: #B0C364; /* your brand color */
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+.hero-content .btn:hover {
+    background-color: #97b24e; /* slightly darker on hover */
+}
     /* RECIPES */
     .recipes{background:#fff;padding:56px 10%;text-align:center}
     .recipes h2{font-size:28px;margin-bottom:28px;font-weight:600}
@@ -76,14 +92,19 @@ $result = $conn->query($sql);
 
 <!-- HERO -->
 <section class="hero">
-  <div class="slideshow" id="home">
-    <div class="slide"><img src="img/bg1.jpg" alt="Slide 1"></div>
-    <div class="slide"><img src="img/bg.jpg" alt="Slide 2"></div>
-    <div class="slide"><img src="img/bg10.jpg" alt="Slide 3"></div>
-  </div>
+  <!-- Background video -->
+  <video autoplay muted loop playsinline>
+    <source src="img/bgvideo.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- Hero content -->
   <div class="hero-content">
     <h2>Welcome to TasteIt</h2>
-  </div>
+    <p>Discover delicious recipes from around the world</p>
+    <a href="#recipe" class="btn">Explore Recipes</a>
+</div>
+
 </section>
 
 <!-- RECIPES -->
@@ -130,29 +151,6 @@ $result = $conn->query($sql);
   <p>&copy; <?php echo date('Y'); ?> TasteIt. All Rights Reserved.</p>
 </footer>
 
-<!-- JS: Slideshow + Smooth scroll -->
-<script>
-  // Slideshow
-  let slideIndex = 0;
-  const slides = document.getElementsByClassName("slide");
-  function showSlides(){
-    for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";
-    slideIndex = (slideIndex % slides.length) + 1;
-    slides[slideIndex - 1].style.display = "block";
-    setTimeout(showSlides, 3000);
-  }
-  if (slides.length) showSlides();
-
-  // Smooth scroll for navbar links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener("click", function(e){
-      e.preventDefault();
-      document.querySelector(this.getAttribute("href")).scrollIntoView({
-        behavior:"smooth"
-      });
-    });
-  });
-</script>
 </body>
 </html>
 <?php $conn->close(); ?>
