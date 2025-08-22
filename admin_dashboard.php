@@ -1,12 +1,19 @@
+
 <?php
 session_start();
 if (!isset($_SESSION['admin_email'])) {
-  header("Location: admin_login.html");
-  exit();
+    header("Location: admin_login.html");
+    exit();
 }
 
 $conn = new mysqli("localhost", "root", "", "tasteit");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// 🔥 Auto delete rejected recipes older than 1 day
+$conn->query("DELETE FROM recipes WHERE status='rejected' AND TIMESTAMPDIFF(DAY, updated_at, NOW()) >= 1");
+
 
 // Stats
 $userCount = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
