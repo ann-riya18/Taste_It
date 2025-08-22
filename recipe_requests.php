@@ -18,7 +18,7 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
   if ($action === 'approve') {
     $conn->query("UPDATE recipes SET status='approved' WHERE id=$id");
   } elseif ($action === 'decline') {
-    $conn->query("UPDATE recipes SET status='declined' WHERE id=$id");
+    $conn->query("UPDATE recipes SET status='rejected' WHERE id=$id");
   }
   header("Location: recipe_requests.php");
   exit();
@@ -75,11 +75,13 @@ $result = $conn->query($sql);
         <h3><?php echo htmlspecialchars($row['title']); ?></h3>
         <p><strong>By:</strong> <?php echo htmlspecialchars($row['username']); ?></p>
         <p><strong>Category:</strong> <?php echo htmlspecialchars($row['category']); ?></p>
-        <p><strong>Ingredients:</strong> <br><?php echo nl2br(htmlspecialchars($row['ingredients'])); ?></p>
-        <p><strong>Instructions:</strong> <br><?php echo nl2br(htmlspecialchars($row['instructions'])); ?></p>
-        <?php if ($row['image']): ?>
-          <img src="uploads/<?php echo $row['image']; ?>" alt="Recipe Image">
+        <p><strong>Ingredients:</strong><br><?php echo nl2br(htmlspecialchars($row['ingredients'])); ?></p>
+        <p><strong>Instructions:</strong><br><?php echo nl2br(htmlspecialchars($row['steps'])); ?></p>
+
+        <?php if (!empty($row['image_path'])): ?>
+          <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
         <?php endif; ?>
+
         <div class="actions">
           <a href="?action=approve&id=<?php echo $row['id']; ?>" class="approve">Approve</a>
           <a href="?action=decline&id=<?php echo $row['id']; ?>" class="decline">Decline</a>

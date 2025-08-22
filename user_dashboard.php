@@ -166,7 +166,7 @@ if ($result && $result->num_rows === 1) {
    
 
      <div class="welcome">Welcome,<br><?php echo htmlspecialchars($user['username']); ?></div>
-     <a href="index.html"><i class="fas fa-home"></i>Home</a>
+     <a href="index.php"><i class="fas fa-home"></i>Home</a>
      <a href="search_recipes.php"><i class="fas fa-search"></i>Search Recipes</a>
      <a href="find_chefs.php"><i class="fas fa-user-friends"></i>Find Chefs</a>
      <a href="recipe_analytics.php"><i class="fas fa-chart-line"></i>My Recipe Analytics</a>

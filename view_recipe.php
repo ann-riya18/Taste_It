@@ -1,4 +1,5 @@
 <?php
+session_start();
 // DB connection
 $conn = new mysqli("localhost", "root", "", "tasteit");
 if ($conn->connect_error) {
@@ -20,6 +21,56 @@ if ($result && $result->num_rows > 0) {
     echo "Recipe not found.";
     exit;
 }
+
+// --- Handle Likes ---
+if (isset($_POST['like'])) {
+    if (!isset($_SESSION['user_id'])) {
+        echo "<script>alert('Only registered users can like recipes. Please login first.'); window.location.href='login.html';</script>";
+        exit;
+    }
+    $user_id = $_SESSION['user_id'];
+    $check = $conn->query("SELECT * FROM likes WHERE user_id=$user_id AND recipe_id=$id");
+    if ($check->num_rows == 0) {
+        $conn->query("INSERT INTO likes (user_id, recipe_id) VALUES ($user_id, $id)");
+    }
+}
+
+// --- Handle Bookmarks ---
+if (isset($_POST['bookmark'])) {
+    if (!isset($_SESSION['user_id'])) {
+        echo "<script>alert('Only registered users can save recipes. Please login first.'); window.location.href='login.html';</script>";
+        exit;
+    }
+    $user_id = $_SESSION['user_id'];
+    $check = $conn->query("SELECT * FROM bookmarks WHERE user_id=$user_id AND recipe_id=$id");
+    if ($check->num_rows == 0) {
+        $conn->query("INSERT INTO bookmarks (user_id, recipe_id) VALUES ($user_id, $id)");
+    }
+}
+
+// --- Handle Comments ---
+if (isset($_POST['comment_text'])) {
+    if (!isset($_SESSION['user_id'])) {
+        echo "<script>alert('Only registered users can comment. Please login first.'); window.location.href='login.html';</script>";
+        exit;
+    }
+    $user_id = $_SESSION['user_id'];
+    $comment = $conn->real_escape_string($_POST['comment_text']);
+    $conn->query("INSERT INTO comments (recipe_id, user_id, comment_text, status) 
+                  VALUES ($id, $user_id, '$comment', 'approved')");
+}
+
+// Fetch likes count
+$res_likes = $conn->query("SELECT COUNT(*) as total FROM likes WHERE recipe_id=$id");
+$likes_count = $res_likes->fetch_assoc()['total'];
+
+// Fetch comments
+$sql_comments = "SELECT c.comment_text, u.username 
+                 FROM comments c 
+                 JOIN users u ON c.user_id=u.id 
+                 WHERE c.recipe_id=$id 
+                 ORDER BY c.created_at DESC";
+$res_comments = $conn->query($sql_comments);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -48,6 +99,12 @@ if ($result && $result->num_rows > 0) {
         display:inline-block;
     }
     table td a:hover {background:#3d4e1f;}
+    .actions {margin-top:20px;}
+    .actions form {display:inline-block; margin-right:10px;}
+    .comment-box {margin-top:20px;}
+    .comment-box textarea {width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;}
+    .comment-box button {margin-top:10px; background:#5A6E2D; color:#fff; border:none; padding:8px 14px; border-radius:5px; cursor:pointer;}
+    .comment {background:#f3f3f3; padding:8px; margin:5px 0; border-radius:6px;}
   </style>
 </head>
 <body>
@@ -94,6 +151,30 @@ if ($result && $result->num_rows > 0) {
         </tr>
         <?php endforeach; ?>
       </table>
+    </div>
+
+    <div class="section actions">
+      <form method="post">
+        <button type="submit" name="like">👍 Like (<?php echo $likes_count; ?>)</button>
+      </form>
+
+      <form method="post">
+        <button type="submit" name="bookmark">🔖 Save</button>
+      </form>
+    </div>
+
+    <div class="section comment-box">
+      <h2>💬 Comments</h2>
+      <form method="post">
+        <textarea name="comment_text" rows="3" placeholder="Write a comment..."></textarea>
+        <button type="submit">Post Comment</button>
+      </form>
+
+      <div>
+        <?php while ($com = $res_comments->fetch_assoc()): ?>
+          <div class="comment"><b><?php echo htmlspecialchars($com['username']); ?>:</b> <?php echo htmlspecialchars($com['comment_text']); ?></div>
+        <?php endwhile; ?>
+      </div>
     </div>
   </div>
 </body>
