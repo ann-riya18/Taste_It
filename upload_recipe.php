@@ -26,6 +26,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $ingredients = $_POST['ingredients'];
     $steps = $_POST['steps'];
     $category = $_POST['category'];
+    $cuisine = $_POST['cuisine'];
+    $course = $_POST['course'];
+    $diet = $_POST['diet'];
+    $quick_recipe = $_POST['quick_recipe'];
 
     $image_path = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
@@ -35,8 +39,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         move_uploaded_file($_FILES["image"]["tmp_name"], $image_path);
     }
 
-    $stmt = $conn->prepare("INSERT INTO recipes (user_id, title, description, ingredients, steps, category, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issssss", $user_id, $title, $description, $ingredients, $steps, $category, $image_path);
+    $stmt = $conn->prepare("INSERT INTO recipes (user_id, title, description, ingredients, steps, category, cuisine, course, diet, quick_recipe, image_path) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issssssssss", $user_id, $title, $description, $ingredients, $steps, $category, $cuisine, $course, $diet, $quick_recipe, $image_path);
 
     if ($stmt->execute()) {
         echo "<script>alert('Recipe uploaded successfully! It will be reviewed by an admin.'); window.location.href='user_dashboard.php';</script>";
@@ -134,13 +139,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <label>Steps</label>
       <textarea name="steps" rows="5" required></textarea>
 
-      <label>Category</label>
+      <label>Main Category</label>
       <select name="category" required>
         <option value="">-- Select Category --</option>
         <option value="Veg">Veg</option>
         <option value="Non-Veg">Non-Veg</option>
         <option value="Dessert">Dessert</option>
         <option value="Snacks">Snacks</option>
+      </select>
+
+      <label>Cuisine</label>
+      <select name="cuisine" required>
+        <option value="">-- Select Cuisine --</option>
+        <option value="Indian">Indian</option>
+        <option value="Italian">Italian</option>
+        <option value="Chinese">Chinese</option>
+        <option value="Mexican">Mexican</option>
+        <option value="Continental">Continental</option>
+      </select>
+
+      <label>Course</label>
+      <select name="course" required>
+        <option value="">-- Select Course --</option>
+        <option value="Breakfast">Breakfast</option>
+        <option value="Lunch">Lunch</option>
+        <option value="Dinner">Dinner</option>
+        <option value="Snacks">Snacks</option>
+        <option value="Desserts">Desserts</option>
+        <option value="Drinks">Drinks</option>
+      </select>
+
+      <label>Diet Preference</label>
+      <select name="diet" required>
+        <option value="">-- Select Diet --</option>
+        <option value="Gluten-Free">Gluten-Free</option>
+        <option value="Lactose-Free">Lactose-Free</option>
+        <option value="Sugar-Free">Sugar-Free</option>
+        <option value="High-Protein">High-Protein</option>
+        <option value="Low-Fat">Low-Fat</option>
+        <option value="Low-Carb">Low-Carb</option>
+      </select>
+
+      <label>Quick Recipe</label>
+      <select name="quick_recipe" required>
+        <option value="">-- Select Time --</option>
+        <option value="Under 15 minutes">Under 15 minutes</option>
+        <option value="Under 30 minutes">Under 30 minutes</option>
       </select>
 
       <label>Upload Image</label>
