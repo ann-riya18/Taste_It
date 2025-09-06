@@ -25,11 +25,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $description = $_POST['description'];
     $ingredients = $_POST['ingredients'];
     $steps = $_POST['steps'];
-    $category = $_POST['category'];
-    $cuisine = $_POST['cuisine'];
-    $course = $_POST['course'];
-    $diet = $_POST['diet'];
-    $quick_recipe = $_POST['quick_recipe'];
+    $main_category = $_POST['main_category'];
+    $sub_category = $_POST['sub_category'];
 
     $image_path = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
@@ -39,9 +36,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         move_uploaded_file($_FILES["image"]["tmp_name"], $image_path);
     }
 
-    $stmt = $conn->prepare("INSERT INTO recipes (user_id, title, description, ingredients, steps, category, cuisine, course, diet, quick_recipe, image_path) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issssssssss", $user_id, $title, $description, $ingredients, $steps, $category, $cuisine, $course, $diet, $quick_recipe, $image_path);
+    $stmt = $conn->prepare("INSERT INTO recipes (user_id, title, description, ingredients, steps, category, image_path) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issssss", $user_id, $title, $description, $ingredients, $steps, $sub_category, $image_path);
 
     if ($stmt->execute()) {
         echo "<script>alert('Recipe uploaded successfully! It will be reviewed by an admin.'); window.location.href='user_dashboard.php';</script>";
@@ -141,54 +138,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
       <!-- Main Category -->
       <label>Main Category</label>
-      <select name="category" id="category" required onchange="showSubOptions()">
+      <select name="main_category" id="main_category" required onchange="showSubOptions()">
         <option value="">-- Select Category --</option>
-        <option value="Veg">Veg</option>
-        <option value="Non-Veg">Non-Veg</option>
-        <option value="Dessert">Dessert</option>
-        <option value="Snacks">Snacks</option>
+        <option value="Cuisine">By Cuisine</option>
+        <option value="Course">By Course</option>
+        <option value="Diet">By Diet Preference</option>
+        <option value="Quick">By Quick Recipe</option>
       </select>
 
-      <!-- Hidden fields (appear after selecting Main Category) -->
+      <!-- Sub Category (dynamic) -->
       <div id="subOptions" style="display:none;">
-        <label>Cuisine</label>
-        <select name="cuisine" required>
-          <option value="">-- Select Cuisine --</option>
-          <option value="Indian">Indian</option>
-          <option value="Italian">Italian</option>
-          <option value="Chinese">Chinese</option>
-          <option value="Mexican">Mexican</option>
-          <option value="Continental">Continental</option>
-        </select>
-
-        <label>Course</label>
-        <select name="course" required>
-          <option value="">-- Select Course --</option>
-          <option value="Breakfast">Breakfast</option>
-          <option value="Lunch">Lunch</option>
-          <option value="Dinner">Dinner</option>
-          <option value="Snacks">Snacks</option>
-          <option value="Desserts">Desserts</option>
-          <option value="Drinks">Drinks</option>
-        </select>
-
-        <label>Diet Preference</label>
-        <select name="diet" required>
-          <option value="">-- Select Diet --</option>
-          <option value="Gluten-Free">Gluten-Free</option>
-          <option value="Lactose-Free">Lactose-Free</option>
-          <option value="Sugar-Free">Sugar-Free</option>
-          <option value="High-Protein">High-Protein</option>
-          <option value="Low-Fat">Low-Fat</option>
-          <option value="Low-Carb">Low-Carb</option>
-        </select>
-
-        <label>Quick Recipe</label>
-        <select name="quick_recipe" required>
-          <option value="">-- Select Time --</option>
-          <option value="Under 15 minutes">Under 15 minutes</option>
-          <option value="Under 30 minutes">Under 30 minutes</option>
-        </select>
+        <label id="subLabel"></label>
+        <select name="sub_category" id="sub_category" required></select>
       </div>
 
       <!-- Upload Image always visible -->
@@ -201,14 +162,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   <script>
     function showSubOptions() {
-      let category = document.getElementById("category").value;
+      let mainCat = document.getElementById("main_category").value;
       let subOptions = document.getElementById("subOptions");
+      let subLabel = document.getElementById("subLabel");
+      let subSelect = document.getElementById("sub_category");
 
-      if (category) {
-        subOptions.style.display = "block";
-      } else {
+      subSelect.innerHTML = ""; // clear old options
+
+      if (!mainCat) {
         subOptions.style.display = "none";
+        return;
       }
+
+      let options = [];
+      if (mainCat === "Cuisine") {
+        subLabel.innerText = "Cuisine";
+        options = ["Indian", "Italian", "Chinese", "Mexican", "Continental"];
+      } else if (mainCat === "Course") {
+        subLabel.innerText = "Course";
+        options = ["Breakfast", "Lunch", "Dinner", "Snacks", "Desserts", "Drinks"];
+      } else if (mainCat === "Diet") {
+        subLabel.innerText = "Diet Preference";
+        options = ["Gluten-Free", "Lactose-Free", "Sugar-Free", "High-Protein", "Low-Fat", "Low-Carb"];
+      } else if (mainCat === "Quick") {
+        subLabel.innerText = "Quick Recipe";
+        options = ["Under 15 minutes", "Under 30 minutes"];
+      }
+
+      // Add placeholder
+      let placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.text = "-- Select " + subLabel.innerText + " --";
+      subSelect.appendChild(placeholder);
+
+      // Add real options
+      options.forEach(function(opt) {
+        let option = document.createElement("option");
+        option.value = opt;
+        option.text = opt;
+        subSelect.appendChild(option);
+      });
+
+      subOptions.style.display = "block";
     }
   </script>
 
