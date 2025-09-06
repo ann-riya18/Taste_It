@@ -19,6 +19,12 @@ if ($result && $result->num_rows > 0) {
     $img = $row['image_path'] ?: "img/placeholder.png";
     $uploaded_by = $row['user_id'];
 
+    // New category fields
+    $cuisine = htmlspecialchars($row['cuisine']);
+    $course  = htmlspecialchars($row['course']);
+    $diet    = htmlspecialchars($row['diet']);
+    $quick   = htmlspecialchars($row['quick_recipe']);
+
     // Fetch uploader details
     $sql_user = "SELECT username, profile_pic, bio FROM users WHERE id=$uploaded_by";
     $res_user = $conn->query($sql_user);
@@ -86,7 +92,7 @@ $res_comments = $conn->query($sql_comments);
   <meta charset="UTF-8">
   <title><?php echo $title; ?> - TasteIt</title>
   <style>
-    body {font-family: Arial, sans-serif; margin:0; padding:0; background:#f9f9f9;}
+    body {font-family: 'Poppins', sans-serif; margin:0; padding:0; background:#f9f9f9;}
     .container {width:80%; margin:50px auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);}
     h1 {color:#333;}
     img {max-width:100%; border-radius:10px; margin-bottom:20px;}
@@ -136,12 +142,36 @@ $res_comments = $conn->query($sql_comments);
     }
     .uploader-card h3 {margin:0; font-size:18px; color:#333;}
     .uploader-card p {margin:2px 0 0; font-size:14px; color:#666;}
+
+    /* Categories */
+    .categories ul {list-style:none; padding:0;}
+    .categories li {margin-bottom:8px;}
+    .categories a {color:#B0C364; text-decoration:none; font-weight:500;}
+    .categories a:hover {text-decoration:underline;}
   </style>
 </head>
 <body>
   <div class="container">
     <h1><?php echo $title; ?></h1>
     <img src="<?php echo $img; ?>" alt="<?php echo $title; ?>">
+
+    <div class="section categories">
+      <h2>📂 Categories</h2>
+      <ul>
+        <?php if ($cuisine): ?>
+          <li>Cuisine: <a href="search.php?cuisine=<?php echo urlencode($cuisine); ?>"><?php echo $cuisine; ?></a></li>
+        <?php endif; ?>
+        <?php if ($course): ?>
+          <li>Course: <a href="search.php?course=<?php echo urlencode($course); ?>"><?php echo $course; ?></a></li>
+        <?php endif; ?>
+        <?php if ($diet): ?>
+          <li>Diet: <a href="search.php?diet=<?php echo urlencode($diet); ?>"><?php echo $diet; ?></a></li>
+        <?php endif; ?>
+        <?php if ($quick): ?>
+          <li>Quick Recipe: <a href="search.php?quick=<?php echo urlencode($quick); ?>"><?php echo $quick; ?></a></li>
+        <?php endif; ?>
+      </ul>
+    </div>
 
     <div class="section">
       <h2>Description</h2>
