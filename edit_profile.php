@@ -5,12 +5,13 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if (!isset($_SESSION['user_email'])) {
-    header("Location: user_login.html");
+if (!isset($_SESSION['user_email']) || !isset($_SESSION['user_id'])) {
+    header("Location: user_login.php");
     exit();
 }
 
 $email = $_SESSION['user_email'];
+$user_id = $_SESSION['user_id'];
 
 // Fetch user info
 $query = $conn->prepare("SELECT username, profile_pic FROM users WHERE email = ?");
@@ -32,13 +33,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Handle profile picture
     if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] === UPLOAD_ERR_OK) {
-        $targetDir = "uploads/";
-        $fileName = basename($_FILES['profile_pic']['name']);
-        $targetFile = $targetDir . uniqid() . "_" . $fileName;
-        $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+        $targetDir = "uploads/user_images/";
 
+        // Ensure directory exists
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+
+        // Extract extension and check type
+        $imageFileType = strtolower(pathinfo($_FILES['profile_pic']['name'], PATHINFO_EXTENSION));
         $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+
         if (in_array($imageFileType, $allowedTypes)) {
+            // New file name (unique per user)
+            $newFileName = "user_" . $user_id . "." . $imageFileType;
+            $targetFile = $targetDir . $newFileName;
+
+            // Delete old file (but not default)
+            if (!empty($profile_pic) && file_exists($profile_pic) && strpos($profile_pic, "default") === false) {
+                unlink($profile_pic);
+            }
+
             if (move_uploaded_file($_FILES['profile_pic']['tmp_name'], $targetFile)) {
                 $profile_filename = $targetFile;
             } else {
@@ -163,7 +178,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <label>Profile Picture</label>
       <input type="file" name="profile_pic">
       <br>
-      <img src="<?php echo $profile_pic ? $profile_pic : 'uploads/default.jpg'; ?>" alt="Current Profile" class="profile-pic">
+      <img src="<?php echo $profile_pic ? $profile_pic : 'uploads/user_images/default.jpg'; ?>" alt="Current Profile" class="profile-pic">
 
       <button type="submit">Update Profile</button>
     </form>
