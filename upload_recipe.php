@@ -25,8 +25,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $description = $_POST['description'];
     $ingredients = $_POST['ingredients'];
     $steps = $_POST['steps'];
-    $main_category = $_POST['main_category'];
-    $sub_category = $_POST['sub_category'];
+
+    // Collect category selections (optional)
+    $cuisine = $_POST['cuisine'] ?? '';
+    $course  = $_POST['course'] ?? '';
+    $diet    = $_POST['diet'] ?? '';
+    $quick_recipe = $_POST['quick_recipe'] ?? '';
 
     $image_path = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
@@ -36,9 +40,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         move_uploaded_file($_FILES["image"]["tmp_name"], $image_path);
     }
 
-    $stmt = $conn->prepare("INSERT INTO recipes (user_id, title, description, ingredients, steps, category, image_path) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issssss", $user_id, $title, $description, $ingredients, $steps, $sub_category, $image_path);
+    $stmt = $conn->prepare("INSERT INTO recipes 
+        (user_id, title, description, ingredients, steps, cuisine, course, diet, quick_recipe, image_path) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("isssssssss", $user_id, $title, $description, $ingredients, $steps, 
+                      $cuisine, $course, $diet, $quick_recipe, $image_path);
 
     if ($stmt->execute()) {
         echo "<script>alert('Recipe uploaded successfully! It will be reviewed by an admin.'); window.location.href='user_dashboard.php';</script>";
@@ -64,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     .container {
-      max-width: 700px;
+      max-width: 750px;
       margin: auto;
       background: white;
       padding: 30px;
@@ -88,8 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     input[type="text"],
-    textarea,
-    select {
+    textarea {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -117,6 +122,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     button:hover {
       background: #98aa4f;
     }
+
+    /* Category toggles */
+    .category-block {
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+    }
+
+    .category-title {
+      cursor: pointer;
+      font-weight: 600;
+      padding: 10px;
+      background: #f6f6f6;
+      border-radius: 5px;
+    }
+
+    .subcategory {
+      display: none;
+      margin-top: 10px;
+      padding-left: 15px;
+    }
+    .subcategory label {
+      font-weight: normal;
+      display: block;
+      margin: 5px 0;
+    }
+
+    .category-block.active .subcategory {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -136,23 +172,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <label>Steps</label>
       <textarea name="steps" rows="5" required></textarea>
 
-      <!-- Main Category -->
-      <label>Main Category</label>
-      <select name="main_category" id="main_category" required onchange="showSubOptions()">
-        <option value="">-- Select Category --</option>
-        <option value="Cuisine">By Cuisine</option>
-        <option value="Course">By Course</option>
-        <option value="Diet">By Diet Preference</option>
-        <option value="Quick">By Quick Recipe</option>
-      </select>
-
-      <!-- Sub Category (dynamic) -->
-      <div id="subOptions" style="display:none;">
-        <label id="subLabel"></label>
-        <select name="sub_category" id="sub_category" required></select>
+      <!-- Main Categories -->
+      <div class="category-block">
+        <div class="category-title">Cuisine</div>
+        <div class="subcategory">
+          <label><input type="radio" name="cuisine" value="Indian"> Indian</label>
+          <label><input type="radio" name="cuisine" value="Italian"> Italian</label>
+          <label><input type="radio" name="cuisine" value="Chinese"> Chinese</label>
+          <label><input type="radio" name="cuisine" value="Mexican"> Mexican</label>
+          <label><input type="radio" name="cuisine" value="Continental"> Continental</label>
+        </div>
       </div>
 
-      <!-- Upload Image always visible -->
+      <div class="category-block">
+        <div class="category-title">Course</div>
+        <div class="subcategory">
+          <label><input type="radio" name="course" value="Breakfast"> Breakfast</label>
+          <label><input type="radio" name="course" value="Lunch"> Lunch</label>
+          <label><input type="radio" name="course" value="Dinner"> Dinner</label>
+          <label><input type="radio" name="course" value="Snacks"> Snacks</label>
+          <label><input type="radio" name="course" value="Desserts"> Desserts</label>
+          <label><input type="radio" name="course" value="Drinks"> Drinks</label>
+        </div>
+      </div>
+
+      <div class="category-block">
+        <div class="category-title">Diet</div>
+        <div class="subcategory">
+          <label><input type="radio" name="diet" value="Gluten-Free"> Gluten-Free</label>
+          <label><input type="radio" name="diet" value="Lactose-Free"> Lactose-Free</label>
+          <label><input type="radio" name="diet" value="Sugar-Free"> Sugar-Free</label>
+          <label><input type="radio" name="diet" value="High-Protein"> High-Protein</label>
+          <label><input type="radio" name="diet" value="Low-Fat"> Low-Fat</label>
+          <label><input type="radio" name="diet" value="Low-Carb"> Low-Carb</label>
+        </div>
+      </div>
+
+      <label>Quick Recipe</label>
+      <select name="quick_recipe">
+        <option value="">-- Select Time --</option>
+        <option value="Under 15 minutes">Under 15 minutes</option>
+        <option value="Under 30 minutes">Under 30 minutes</option>
+      </select>
+
       <label>Upload Image</label>
       <input type="file" name="image" accept="image/*" required>
 
@@ -161,51 +223,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </div>
 
   <script>
-    function showSubOptions() {
-      let mainCat = document.getElementById("main_category").value;
-      let subOptions = document.getElementById("subOptions");
-      let subLabel = document.getElementById("subLabel");
-      let subSelect = document.getElementById("sub_category");
-
-      subSelect.innerHTML = ""; // clear old options
-
-      if (!mainCat) {
-        subOptions.style.display = "none";
-        return;
-      }
-
-      let options = [];
-      if (mainCat === "Cuisine") {
-        subLabel.innerText = "Cuisine";
-        options = ["Indian", "Italian", "Chinese", "Mexican", "Continental"];
-      } else if (mainCat === "Course") {
-        subLabel.innerText = "Course";
-        options = ["Breakfast", "Lunch", "Dinner", "Snacks", "Desserts", "Drinks"];
-      } else if (mainCat === "Diet") {
-        subLabel.innerText = "Diet Preference";
-        options = ["Gluten-Free", "Lactose-Free", "Sugar-Free", "High-Protein", "Low-Fat", "Low-Carb"];
-      } else if (mainCat === "Quick") {
-        subLabel.innerText = "Quick Recipe";
-        options = ["Under 15 minutes", "Under 30 minutes"];
-      }
-
-      // Add placeholder
-      let placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.text = "-- Select " + subLabel.innerText + " --";
-      subSelect.appendChild(placeholder);
-
-      // Add real options
-      options.forEach(function(opt) {
-        let option = document.createElement("option");
-        option.value = opt;
-        option.text = opt;
-        subSelect.appendChild(option);
+    // Toggle subcategories
+    document.querySelectorAll('.category-title').forEach(title => {
+      title.addEventListener('click', function() {
+        this.parentElement.classList.toggle('active');
       });
-
-      subOptions.style.display = "block";
-    }
+    });
   </script>
-
 </body>
 </html>
