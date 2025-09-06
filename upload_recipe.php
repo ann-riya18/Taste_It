@@ -139,8 +139,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <label>Steps</label>
       <textarea name="steps" rows="5" required></textarea>
 
+      <!-- Main Category -->
       <label>Main Category</label>
-      <select name="category" required>
+      <select name="category" id="category" required onchange="showSubOptions()">
         <option value="">-- Select Category --</option>
         <option value="Veg">Veg</option>
         <option value="Non-Veg">Non-Veg</option>
@@ -148,51 +149,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <option value="Snacks">Snacks</option>
       </select>
 
-      <label>Cuisine</label>
-      <select name="cuisine" required>
-        <option value="">-- Select Cuisine --</option>
-        <option value="Indian">Indian</option>
-        <option value="Italian">Italian</option>
-        <option value="Chinese">Chinese</option>
-        <option value="Mexican">Mexican</option>
-        <option value="Continental">Continental</option>
-      </select>
+      <!-- Hidden fields (appear after selecting Main Category) -->
+      <div id="subOptions" style="display:none;">
+        <label>Cuisine</label>
+        <select name="cuisine" required>
+          <option value="">-- Select Cuisine --</option>
+          <option value="Indian">Indian</option>
+          <option value="Italian">Italian</option>
+          <option value="Chinese">Chinese</option>
+          <option value="Mexican">Mexican</option>
+          <option value="Continental">Continental</option>
+        </select>
 
-      <label>Course</label>
-      <select name="course" required>
-        <option value="">-- Select Course --</option>
-        <option value="Breakfast">Breakfast</option>
-        <option value="Lunch">Lunch</option>
-        <option value="Dinner">Dinner</option>
-        <option value="Snacks">Snacks</option>
-        <option value="Desserts">Desserts</option>
-        <option value="Drinks">Drinks</option>
-      </select>
+        <label>Course</label>
+        <select name="course" required>
+          <option value="">-- Select Course --</option>
+          <option value="Breakfast">Breakfast</option>
+          <option value="Lunch">Lunch</option>
+          <option value="Dinner">Dinner</option>
+          <option value="Snacks">Snacks</option>
+          <option value="Desserts">Desserts</option>
+          <option value="Drinks">Drinks</option>
+        </select>
 
-      <label>Diet Preference</label>
-      <select name="diet" required>
-        <option value="">-- Select Diet --</option>
-        <option value="Gluten-Free">Gluten-Free</option>
-        <option value="Lactose-Free">Lactose-Free</option>
-        <option value="Sugar-Free">Sugar-Free</option>
-        <option value="High-Protein">High-Protein</option>
-        <option value="Low-Fat">Low-Fat</option>
-        <option value="Low-Carb">Low-Carb</option>
-      </select>
+        <label>Diet Preference</label>
+        <select name="diet" required>
+          <option value="">-- Select Diet --</option>
+          <option value="Gluten-Free">Gluten-Free</option>
+          <option value="Lactose-Free">Lactose-Free</option>
+          <option value="Sugar-Free">Sugar-Free</option>
+          <option value="High-Protein">High-Protein</option>
+          <option value="Low-Fat">Low-Fat</option>
+          <option value="Low-Carb">Low-Carb</option>
+        </select>
 
-      <label>Quick Recipe</label>
-      <select name="quick_recipe" required>
-        <option value="">-- Select Time --</option>
-        <option value="Under 15 minutes">Under 15 minutes</option>
-        <option value="Under 30 minutes">Under 30 minutes</option>
-      </select>
+        <label>Quick Recipe</label>
+        <select name="quick_recipe" required>
+          <option value="">-- Select Time --</option>
+          <option value="Under 15 minutes">Under 15 minutes</option>
+          <option value="Under 30 minutes">Under 30 minutes</option>
+        </select>
+      </div>
 
+      <!-- Upload Image always visible -->
       <label>Upload Image</label>
       <input type="file" name="image" accept="image/*" required>
 
       <button type="submit">Submit Recipe</button>
     </form>
   </div>
+
+  <script>
+    function showSubOptions() {
+      let category = document.getElementById("category").value;
+      let subOptions = document.getElementById("subOptions");
+
+      if (category) {
+        subOptions.style.display = "block";
+      } else {
+        subOptions.style.display = "none";
+      }
+    }
+  </script>
 
 </body>
 </html>
