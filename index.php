@@ -438,6 +438,7 @@ $result = $conn->query($sql);
     <li><a href="search.php?cuisine=Italian">Italian</a></li>
     <li><a href="search.php?cuisine=Chinese">Chinese</a></li>
     <li><a href="search.php?cuisine=Continental">Continental</a></li>
+    <li><a href="search.php?cuisine=Mexican">Mexican</a></li>
   </ul>
 
   <h3>By Course</h3>
@@ -452,12 +453,12 @@ $result = $conn->query($sql);
 
   <h3>By Diet</h3>
   <ul>
-    <li><a href="search.php?diet=Veg">Veg</a></li>
-    <li><a href="search.php?diet=Non-Veg">Non-Veg</a></li>
-    <li><a href="search.php?diet=Vegan">Vegan</a></li>
-    <li><a href="search.php?diet=Gluten-Free">Gluten-Free</a></li>
-    <li><a href="search.php?diet=Keto">Keto</a></li>
-    <li><a href="search.php?diet=Healthy">Healthy</a></li>
+   <li><a href="search.php?diet=Gluten-Free">Gluten-Free</a></li>
+    <li><a href="search.php?diet=Lactose-Free">Lactose-Free</a></li>
+    <li><a href="search.php?diet=Sugar-Free">Sugar-Free</a></li>
+    <li><a href="search.php?diet=High-Protein">High-Protein</a></li>
+    <li><a href="search.php?diet=Low-Fat">Low-Fat</a></li>
+    <li><a href="search.php?diet=Low-Carb">Low-Carb</a></li>
   </ul>
 
   <h3>Quick Recipes</h3>
