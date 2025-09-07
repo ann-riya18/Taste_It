@@ -214,57 +214,100 @@ $result = $conn->query($sql);
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Poppins',sans-serif;background:#f9f9f9;color:#222;overflow-x:hidden}
 
-    /* HEADER */
-    .transparent-header{position:fixed;top:0;left:0;width:100%;background:rgba(0,0,0,0.4);padding:15px 40px;z-index:1000}
-    .transparent-header .container{display:flex;justify-content:space-between;align-items:center;max-width:1400px;margin:0 auto}
-    .transparent-header .logo{font-size:28px;font-weight:bold;color:#fff}
-    .menu-toggle{font-size:26px;color:#fff;cursor:pointer;}
-    
-    .transparent-header .container {
+    .transparent-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  padding: 15px 40px;
+  z-index: 1000;
+}
+
+.transparent-header .container {
   display: flex;
-  justify-content: space-between; /* logo left, nav+menu right */
+  justify-content: space-between;
   align-items: center;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.nav-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 20px; /* spacing between nav links and the hamburger */
+.transparent-header .logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
 }
 
+/* Navbar links */
 .nav-links ul {
   list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
-  gap: 25px;
+  align-items: center;
+}
+
+.nav-links ul li {
+  position: relative;
+  margin-left: 25px;
 }
 
 .nav-links ul li a {
-  color: #fff;
   text-decoration: none;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
-  transition: color 0.3s;
+  font-size: 16px;
+  padding: 6px 10px;
+  transition: color 0.3s ease;
 }
 
 .nav-links ul li a:hover {
+  color: #B0C364; /* project green */
+}
+
+/* Dropdown styling */
+.nav-links ul li ul.dropdown-menu {
+  display: none;
+  position: absolute;
+  background: rgba(0,0,0,0.9);
+  padding: 10px;
+  list-style: none;
+  min-width: 220px;
+  z-index: 1000;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.nav-links ul li:hover ul.dropdown-menu {
+  display: block;
+}
+
+.nav-links ul li ul.dropdown-menu li {
+  margin: 5px 0;
+}
+
+.nav-links ul li ul.dropdown-menu li a {
+  color: #fff;
+  display: block;
+  padding: 6px 10px;
+  transition: color 0.3s ease;
+}
+
+.nav-links ul li ul.dropdown-menu li a:hover {
   color: #B0C364;
 }
 
-.menu-toggle {
-  font-size: 22px;
-  color: #fff;
-  cursor: pointer;
+/* Dropdown section headers */
+.nav-links ul li ul.dropdown-menu li strong {
+  color: #B0C364;
+  font-weight: bold;
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 14px;
 }
 
-    /* SIDE MENU */
-    .side-menu{position:fixed;top:0;right:-300px;width:280px;height:100%;background:#fff;box-shadow:-2px 0 10px rgba(0,0,0,0.2);padding:20px;transition:0.3s;z-index:1100;overflow-y:auto}
-    .side-menu.active{right:0}
-    .side-menu h3{color:#B0C364;font-size:20px;margin:15px 0 10px}
-    .side-menu ul{list-style:none;margin-bottom:20px}
-    .side-menu ul li a{text-decoration:none;color:#333;display:block;padding:8px 0;transition:0.3s}
-    .side-menu ul li a:hover{color:#B0C364}
-    .close-btn{font-size:22px;color:#333;cursor:pointer;float:right}
 
     /* HERO */
     .hero{height:100vh;position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden}
@@ -417,56 +460,53 @@ $result = $conn->query($sql);
       <nav class="nav-links">
         <ul>
           <li><a href="index.php">Home</a></li>
-          <li><a href="#recipe">Recipes</a></li>
+
+          <!-- Recipes with dropdown -->
+          <li class="dropdown">
+            <a href="#">Recipes</a>
+            <ul class="dropdown-menu">
+              <li><strong>By Cuisine</strong></li>
+              <li><a href="search.php?cuisine=Indian">Indian</a></li>
+              <li><a href="search.php?cuisine=American">American</a></li>
+              <li><a href="search.php?cuisine=Chinese">Chinese</a></li>
+              <li><a href="search.php?cuisine=Mexican">Mexican</a></li>
+              <li><a href="search.php?cuisine=Asian">Asian</a></li>
+              <li><a href="search.php?cuisine=Middle Eastern">Middle Eastern</a></li>
+              <li><a href="search.php?cuisine=Continental">Continental</a></li>
+              <li><hr></li>
+
+              <li><strong>By Course</strong></li>
+              <li><a href="search.php?course=Breakfast">Breakfast</a></li>
+              <li><a href="search.php?course=Lunch">Lunch</a></li>
+              <li><a href="search.php?course=Dinner">Dinner</a></li>
+              <li><a href="search.php?course=Snacks">Snacks</a></li>
+              <li><a href="search.php?course=Desserts">Desserts</a></li>
+              <li><a href="search.php?course=Drinks">Drinks</a></li>
+              <li><hr></li>
+
+              <li><strong>By Diet</strong></li>
+              <li><a href="search.php?diet=Gluten-Free">Gluten-Free</a></li>
+              <li><a href="search.php?diet=Lactose-Free">Lactose-Free</a></li>
+              <li><a href="search.php?diet=Sugar-Free">Sugar-Free</a></li>
+              <li><a href="search.php?diet=High-Protein">High-Protein</a></li>
+              <li><a href="search.php?diet=Low-Fat">Low-Fat</a></li>
+              <li><a href="search.php?diet=Low-Carb">Low-Carb</a></li>
+              <li><hr></li>
+
+              <li><strong>Quick Recipes</strong></li>
+              <li><a href="search.php?time=15">Under 15 minutes</a></li>
+              <li><a href="search.php?time=30">Under 30 minutes</a></li>
+            </ul>
+          </li>
+
           <li><a href="#about">About</a></li>
           <li><a href="login.html">Login</a></li>
         </ul>
       </nav>
-      <div class="menu-toggle"><i class="fas fa-bars"></i></div>
     </div>
   </div>
 </header>
 
-
-<!-- SIDE MENU -->
-<div class="side-menu" id="sideMenu">
-  <span class="close-btn" id="closeBtn"><i class="fas fa-times"></i></span>
-
-  <h3>By Cuisine</h3>
-  <ul>
-    <li><a href="search.php?cuisine=Indian">Indian</a></li>
-    <li><a href="search.php?cuisine=Italian">Italian</a></li>
-    <li><a href="search.php?cuisine=Chinese">Chinese</a></li>
-    <li><a href="search.php?cuisine=Continental">Continental</a></li>
-    <li><a href="search.php?cuisine=Mexican">Mexican</a></li>
-  </ul>
-
-  <h3>By Course</h3>
-  <ul>
-    <li><a href="search.php?course=Breakfast">Breakfast</a></li>
-    <li><a href="search.php?course=Lunch">Lunch</a></li>
-    <li><a href="search.php?course=Dinner">Dinner</a></li>
-    <li><a href="search.php?course=Snacks">Snacks</a></li>
-    <li><a href="search.php?course=Desserts">Desserts</a></li>
-    <li><a href="search.php?course=Drinks">Drinks</a></li>
-  </ul>
-
-  <h3>By Diet</h3>
-  <ul>
-   <li><a href="search.php?diet=Gluten-Free">Gluten-Free</a></li>
-    <li><a href="search.php?diet=Lactose-Free">Lactose-Free</a></li>
-    <li><a href="search.php?diet=Sugar-Free">Sugar-Free</a></li>
-    <li><a href="search.php?diet=High-Protein">High-Protein</a></li>
-    <li><a href="search.php?diet=Low-Fat">Low-Fat</a></li>
-    <li><a href="search.php?diet=Low-Carb">Low-Carb</a></li>
-  </ul>
-
-  <h3>Quick Recipes</h3>
-  <ul>
-    <li><a href="search.php?time=15">Under 15 minutes</a></li>
-    <li><a href="search.php?time=30">Under 30 minutes</a></li>
-  </ul>
-</div>
 
 <!-- HERO -->
 <section class="hero">
