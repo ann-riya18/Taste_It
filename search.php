@@ -13,7 +13,8 @@ if (!empty($searchTerm)) {
         SELECT r.id, r.title, r.description, r.image_path 
         FROM recipes r 
         JOIN users u ON r.user_id = u.id 
-        WHERE r.title LIKE ? OR u.username LIKE ?
+        WHERE (r.title LIKE ? OR u.username LIKE ?) 
+        AND r.status = 'approved'
         ORDER BY r.id DESC
     ");
     $like = "%" . $searchTerm . "%";
@@ -21,8 +22,11 @@ if (!empty($searchTerm)) {
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    // Otherwise → show 6 latest popular recipes
-    $sql = "SELECT id, title, description, image_path FROM recipes ORDER BY id DESC LIMIT 6";
+    // Otherwise → show 6 latest approved recipes
+    $sql = "SELECT id, title, description, image_path 
+            FROM recipes 
+            WHERE status = 'approved'
+            ORDER BY id DESC LIMIT 6";
     $result = $conn->query($sql);
 }
 ?>
@@ -54,7 +58,7 @@ if (!empty($searchTerm)) {
     .search-box button{padding:12px 24px;margin-left:10px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer}
     .search-box button:hover{background:#97b24e}
 
-    /* CARDS (same as home) */
+    /* CARDS */
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px}
     .card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.08);transition:transform .25s ease, box-shadow .25s ease;cursor:pointer;text-decoration:none;color:inherit;display:block}
     .card:hover{transform:translateY(-6px);box-shadow:0 10px 20px rgba(0,0,0,.12)}
