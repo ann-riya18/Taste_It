@@ -17,7 +17,24 @@ $user = $result->fetch_assoc();
 $user_id = $user['id'];
 $username = $user['username'];
 
-// Fetch recipes
+// ✅ Handle Delete Request
+if (isset($_POST['delete_recipe'])) {
+    $recipe_id = intval($_POST['recipe_id']);
+
+    // Fetch recipe image to delete file if exists
+    $img_res = $conn->query("SELECT image_path FROM recipes WHERE id = $recipe_id AND user_id = $user_id");
+    if ($img_res && $img_res->num_rows > 0) {
+        $img_row = $img_res->fetch_assoc();
+        if (!empty($img_row['image_path']) && file_exists($img_row['image_path'])) {
+            unlink($img_row['image_path']); // delete image file
+        }
+    }
+
+    // Delete recipe from DB
+    $conn->query("DELETE FROM recipes WHERE id = $recipe_id AND user_id = $user_id");
+}
+
+// Fetch recipes again after delete
 $recipes = $conn->query("SELECT * FROM recipes WHERE user_id = $user_id ORDER BY created_at DESC");
 ?>
 
@@ -42,6 +59,7 @@ $recipes = $conn->query("SELECT * FROM recipes WHERE user_id = $user_id ORDER BY
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       margin-bottom: 25px;
+      position: relative;
     }
     .recipe img {
       max-width: 100%;
@@ -64,6 +82,22 @@ $recipes = $conn->query("SELECT * FROM recipes WHERE user_id = $user_id ORDER BY
       color: #721c24;
       font-style: italic;
     }
+    .delete-btn {
+      background: #D7263D;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      transition: background 0.3s;
+    }
+    .delete-btn:hover {
+      background: #a91c2a;
+    }
   </style>
 </head>
 <body>
@@ -73,6 +107,11 @@ $recipes = $conn->query("SELECT * FROM recipes WHERE user_id = $user_id ORDER BY
   <?php if ($recipes->num_rows > 0): ?>
     <?php while ($row = $recipes->fetch_assoc()): ?>
       <div class="recipe">
+        <form method="POST" onsubmit="return confirm('Are you sure you want to delete this recipe?');">
+          <input type="hidden" name="recipe_id" value="<?php echo $row['id']; ?>">
+          <button type="submit" name="delete_recipe" class="delete-btn">❌ Delete</button>
+        </form>
+
         <h3><?php echo htmlspecialchars($row['title']); ?></h3>
         <?php if ($row['image_path']): ?>
           <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
