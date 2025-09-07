@@ -1,141 +1,150 @@
-<?php
+<?php 
 session_start();
-if (!isset($_SESSION['user_email'])) {
-    header("Location: user_login.html");
+include 'db.php'; // your DB connection file
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: user_login.php");
     exit();
 }
 
-$conn = new mysqli("localhost", "root", "", "tasteit");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// Handle recipe deletion if "delete_id" is passed
+if (isset($_GET['delete_id'])) {
+    $delete_id = intval($_GET['delete_id']);
+    $user_id = $_SESSION['user_id'];
 
-// Get user ID
-$email = $_SESSION['user_email'];
-$result = $conn->query("SELECT id, username FROM users WHERE email = '$email'");
-$user = $result->fetch_assoc();
-$user_id = $user['id'];
-$username = $user['username'];
-
-// ✅ Handle Delete Request
-if (isset($_POST['delete_recipe'])) {
-    $recipe_id = intval($_POST['recipe_id']);
-
-    // Fetch recipe image to delete file if exists
-    $img_res = $conn->query("SELECT image_path FROM recipes WHERE id = $recipe_id AND user_id = $user_id");
-    if ($img_res && $img_res->num_rows > 0) {
-        $img_row = $img_res->fetch_assoc();
-        if (!empty($img_row['image_path']) && file_exists($img_row['image_path'])) {
-            unlink($img_row['image_path']); // delete image file
-        }
+    // Ensure only the owner can delete
+    $sql = "DELETE FROM recipes WHERE id = $delete_id AND user_id = $user_id";
+    if ($conn->query($sql)) {
+        echo "<script>alert('Recipe deleted successfully!'); window.location.href='my_recipes.php';</script>";
+        exit();
+    } else {
+        echo "<script>alert('Error deleting recipe.');</script>";
     }
-
-    // Delete recipe from DB
-    $conn->query("DELETE FROM recipes WHERE id = $recipe_id AND user_id = $user_id");
 }
-
-// Fetch recipes again after delete
-$recipes = $conn->query("SELECT * FROM recipes WHERE user_id = $user_id ORDER BY created_at DESC");
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Recipes</title>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #fff8f2;
-      padding: 40px;
-    }
-    h2 {
-      color: #D7263D;
-      margin-bottom: 30px;
-    }
-    .recipe {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      margin-bottom: 25px;
-      position: relative;
-    }
-    .recipe img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-    .status {
-      font-weight: bold;
-      padding: 6px 12px;
-      border-radius: 5px;
-      display: inline-block;
-      margin-top: 10px;
-    }
-    .approved { background-color: #d4edda; color: #155724; }
-    .pending { background-color: #fff3cd; color: #856404; }
-    .declined { background-color: #f8d7da; color: #721c24; }
-    .message {
-      margin-top: 10px;
-      color: #721c24;
-      font-style: italic;
-    }
-    .delete-btn {
-      background: #D7263D;
-      color: #fff;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      transition: background 0.3s;
-    }
-    .delete-btn:hover {
-      background: #a91c2a;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Recipes</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 20px;
+            background: #f8f9fa;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .recipe-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .recipe-card {
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .recipe-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .recipe-card h3 {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .recipe-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            min-height: 40px;
+        }
+
+        .recipe-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-edit {
+            background-color: #B0C364;
+        }
+        .btn-edit:hover {
+            background-color: #9bb050;
+        }
+
+        .btn-delete {
+            background-color: #E74C3C;
+        }
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 <body>
 
-  <h2>👩‍🍳 <?php echo htmlspecialchars($username); ?>'s Recipes</h2>
+<h2>My Recipes</h2>
+<div class="recipe-container">
+    <?php
+    $user_id = $_SESSION['user_id'];
+    $sql = "SELECT id, title, description, image_path FROM recipes WHERE user_id = $user_id ORDER BY id DESC";
+    $result = $conn->query($sql);
 
-  <?php if ($recipes->num_rows > 0): ?>
-    <?php while ($row = $recipes->fetch_assoc()): ?>
-      <div class="recipe">
-        <form method="POST" onsubmit="return confirm('Are you sure you want to delete this recipe?');">
-          <input type="hidden" name="recipe_id" value="<?php echo $row['id']; ?>">
-          <button type="submit" name="delete_recipe" class="delete-btn">❌ Delete</button>
-        </form>
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            echo '<div class="recipe-card">';
+            echo '<img src="'.$row['image_path'].'" alt="'.$row['title'].'">';
+            echo '<h3>'.$row['title'].'</h3>';
+            echo '<p>'.$row['description'].'</p>';
 
-        <h3><?php echo htmlspecialchars($row['title']); ?></h3>
-        <?php if ($row['image_path']): ?>
-          <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
-        <?php endif; ?>
-        <p><strong>Category:</strong> <?php echo htmlspecialchars($row['category']); ?></p>
-        <div class="status 
-          <?php 
-            echo ($row['status'] == 'approved') ? 'approved' : 
-                 (($row['status'] == 'pending') ? 'pending' : 'declined'); 
-          ?>">
-          <?php echo ucfirst($row['status']); ?>
-        </div>
+            // Edit & Delete buttons
+            echo '<div class="recipe-actions">';
+            echo '<a href="edit_recipe.php?id='.$row['id'].'" class="btn btn-edit">Edit</a>';
+            echo '<a href="my_recipes.php?delete_id='.$row['id'].'" class="btn btn-delete" onclick="return confirm(\'Are you sure you want to delete this recipe?\');">Delete</a>';
+            echo '</div>';
 
-        <?php if ($row['status'] == 'declined'): ?>
-          <div class="message">⚠️ Your recipe was declined by the admin. Sorry!</div>
-        <?php elseif ($row['status'] == 'pending'): ?>
-          <div class="message">⏳ This recipe is pending admin review.</div>
-        <?php endif; ?>
-      </div>
-    <?php endwhile; ?>
-  <?php else: ?>
-    <p>You haven't uploaded any recipes yet.</p>
-  <?php endif; ?>
+            echo '</div>';
+        }
+    } else {
+        echo "<p style='text-align:center;'>You haven't uploaded any recipes yet.</p>";
+    }
+    ?>
+</div>
 
 </body>
 </html>
-<?php $conn->close(); ?>
