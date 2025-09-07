@@ -177,9 +177,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="category-title">Cuisine</div>
         <div class="subcategory">
           <label><input type="radio" name="cuisine" value="Indian"> Indian</label>
-          <label><input type="radio" name="cuisine" value="Italian"> Italian</label>
+          <label><input type="radio" name="cuisine" value="American"> American</label>
           <label><input type="radio" name="cuisine" value="Chinese"> Chinese</label>
           <label><input type="radio" name="cuisine" value="Mexican"> Mexican</label>
+          <label><input type="radio" name="cuisine" value="Asian"> Asian</label>
+          <label><input type="radio" name="cuisine" value="Middle Eastern"> Middle Eastern</label>
           <label><input type="radio" name="cuisine" value="Continental"> Continental</label>
         </div>
       </div>
