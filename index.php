@@ -214,7 +214,8 @@ $result = $conn->query($sql);
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Poppins',sans-serif;background:#f9f9f9;color:#222;overflow-x:hidden}
 
-    .transparent-header {
+/* Transparent header */
+.transparent-header {
   position: fixed;
   top: 0;
   left: 0;
@@ -235,11 +236,11 @@ $result = $conn->query($sql);
 .transparent-header .logo {
   font-size: 28px;
   font-weight: bold;
-  color: #fff;
+  color: #b0c364;
   font-family: 'Poppins', sans-serif;
 }
 
-/* Navbar links */
+/* Nav links */
 .nav-links ul {
   list-style: none;
   margin: 0;
@@ -264,52 +265,130 @@ $result = $conn->query($sql);
 }
 
 .nav-links ul li a:hover {
-  color: #B0C364; /* project green */
+  color: #B0C364;
 }
 
-/* Dropdown styling */
+/* Dropdown Menu Container */
 .nav-links ul li ul.dropdown-menu {
   display: none;
   position: absolute;
-  background: rgba(0,0,0,0.9);
-  padding: 10px;
+  top: 100%;
+  left: 0;
+  background: rgba(255, 255, 255, 0.4); /* light transparent */
+  padding: 15px;
   list-style: none;
-  min-width: 220px;
-  z-index: 1000;
+  width: 280px;
+  max-height: 400px;
+  overflow-y: auto;
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 999;
+  backdrop-filter: blur(6px); /* subtle blur to enhance transparency */
 }
 
-.nav-links ul li:hover ul.dropdown-menu {
+/* Show dropdown on hover */
+.nav-links ul li.dropdown:hover ul.dropdown-menu {
   display: block;
 }
 
-.nav-links ul li ul.dropdown-menu li {
-  margin: 5px 0;
-}
-
-.nav-links ul li ul.dropdown-menu li a {
-  color: #fff;
+/* Category container */
+.category {
   display: block;
-  padding: 6px 10px;
-  transition: color 0.3s ease;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 6px;
 }
 
-.nav-links ul li ul.dropdown-menu li a:hover {
-  color: #B0C364;
+/* Category title styling */
+.category-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  color: #B0C364; /* olive green */
+  background: rgba(246, 246, 246, 0.94); /* subtle transparent bg */
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Dropdown section headers */
-.nav-links ul li ul.dropdown-menu li strong {
-  color: #B0C364;
-  font-weight: bold;
+.category-title:hover {
+  background: rgba(176, 195, 100, 0.15); /* slightly darker transparent bg */
+  color: #566711; /* darker olive green on hover */
+}
+
+/* Arrow icon */
+.category-title .arrow {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.category.open .category-title .arrow {
+  transform: rotate(90deg);
+}
+
+/* Subcategories hidden by default */
+.sub-categories {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  margin: 6px 0 0 12px;
+  padding-left: 0;
+  list-style: none;
   display: block;
-  margin: 8px 0 4px;
+  flex-direction: column;
+}
+
+/* Show subcategories when open */
+.category.open .sub-categories {
+  max-height: 500px;
+  display: block;
+}
+
+/* Each subcategory */
+.sub-categories li {
+  display: block;
+  margin: 4px 0;
+}
+
+.sub-categories li a {
+  display: block;
+  padding: 6px 12px;
   font-size: 14px;
+  text-decoration: none;
+  color: #B0C364; /* olive green text */
+  font-family: 'Poppins', sans-serif;
+  border-radius: 4px;
+  transition: background 0.2s ease, color 0.2s ease;
+  width: 100%;
+}
+
+.sub-categories li a:hover {
+  background: rgba(176, 195, 100, 0.15); /* slightly darker transparent bg */
+  color: #566711; /* darker olive green text */
+}
+
+/* Optional scrollbar styling for dropdown */
+.nav-links ul li ul.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.nav-links ul li ul.dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(176, 195, 100, 0.4);
+  border-radius: 3px;
+}
+
+.nav-links ul li ul.dropdown-menu::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 
-    /* HERO */
+
+
+
     .hero{height:100vh;position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden}
     .hero video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
     .hero::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:2}
@@ -451,7 +530,7 @@ $result = $conn->query($sql);
   </style>
 </head>
 <body>
-<!-- HEADER -->
+
 <header class="transparent-header">
   <div class="container">
     <h1 class="logo">TasteIt</h1>
@@ -461,41 +540,60 @@ $result = $conn->query($sql);
         <ul>
           <li><a href="index.php">Home</a></li>
 
-          <!-- Recipes with dropdown -->
+          <!-- Recipes Dropdown -->
           <li class="dropdown">
             <a href="#">Recipes</a>
             <ul class="dropdown-menu">
-              <li><strong>By Cuisine</strong></li>
-              <li><a href="search.php?cuisine=Indian">Indian</a></li>
-              <li><a href="search.php?cuisine=American">American</a></li>
-              <li><a href="search.php?cuisine=Chinese">Chinese</a></li>
-              <li><a href="search.php?cuisine=Mexican">Mexican</a></li>
-              <li><a href="search.php?cuisine=Asian">Asian</a></li>
-              <li><a href="search.php?cuisine=Middle Eastern">Middle Eastern</a></li>
-              <li><a href="search.php?cuisine=Continental">Continental</a></li>
-              <li><hr></li>
+              
+              <!-- By Cuisine -->
+              <li class="category">
+                <div class="category-title">By Cuisine <span class="arrow">▶</span></div>
+                <ul class="sub-categories">
+                  <li><a href="search.php?cuisine=Indian">Indian</a></li>
+                  <li><a href="search.php?cuisine=American">American</a></li>
+                  <li><a href="search.php?cuisine=Chinese">Chinese</a></li>
+                  <li><a href="search.php?cuisine=Mexican">Mexican</a></li>
+                  <li><a href="search.php?cuisine=Asian">Asian</a></li>
+                  <li><a href="search.php?cuisine=Middle Eastern">Middle Eastern</a></li>
+                  <li><a href="search.php?cuisine=Continental">Continental</a></li>
+                </ul>
+              </li>
 
-              <li><strong>By Course</strong></li>
-              <li><a href="search.php?course=Breakfast">Breakfast</a></li>
-              <li><a href="search.php?course=Lunch">Lunch</a></li>
-              <li><a href="search.php?course=Dinner">Dinner</a></li>
-              <li><a href="search.php?course=Snacks">Snacks</a></li>
-              <li><a href="search.php?course=Desserts">Desserts</a></li>
-              <li><a href="search.php?course=Drinks">Drinks</a></li>
-              <li><hr></li>
+              <!-- By Course -->
+              <li class="category">
+                <div class="category-title">By Course <span class="arrow">▶</span></div>
+                <ul class="sub-categories">
+                  <li><a href="search.php?course=Breakfast">Breakfast</a></li>
+                  <li><a href="search.php?course=Lunch">Lunch</a></li>
+                  <li><a href="search.php?course=Dinner">Dinner</a></li>
+                  <li><a href="search.php?course=Snacks">Snacks</a></li>
+                  <li><a href="search.php?course=Desserts">Desserts</a></li>
+                  <li><a href="search.php?course=Drinks">Drinks</a></li>
+                </ul>
+              </li>
 
-              <li><strong>By Diet</strong></li>
-              <li><a href="search.php?diet=Gluten-Free">Gluten-Free</a></li>
-              <li><a href="search.php?diet=Lactose-Free">Lactose-Free</a></li>
-              <li><a href="search.php?diet=Sugar-Free">Sugar-Free</a></li>
-              <li><a href="search.php?diet=High-Protein">High-Protein</a></li>
-              <li><a href="search.php?diet=Low-Fat">Low-Fat</a></li>
-              <li><a href="search.php?diet=Low-Carb">Low-Carb</a></li>
-              <li><hr></li>
+              <!-- By Diet -->
+              <li class="category">
+                <div class="category-title">By Diet <span class="arrow">▶</span></div>
+                <ul class="sub-categories">
+                  <li><a href="search.php?diet=Gluten-Free">Gluten-Free</a></li>
+                  <li><a href="search.php?diet=Lactose-Free">Lactose-Free</a></li>
+                  <li><a href="search.php?diet=Sugar-Free">Sugar-Free</a></li>
+                  <li><a href="search.php?diet=High-Protein">High-Protein</a></li>
+                  <li><a href="search.php?diet=Low-Fat">Low-Fat</a></li>
+                  <li><a href="search.php?diet=Low-Carb">Low-Carb</a></li>
+                </ul>
+              </li>
 
-              <li><strong>Quick Recipes</strong></li>
-              <li><a href="search.php?time=15">Under 15 minutes</a></li>
-              <li><a href="search.php?time=30">Under 30 minutes</a></li>
+              <!-- Quick Recipes -->
+              <li class="category">
+                <div class="category-title">Quick Recipes <span class="arrow">▶</span></div>
+                <ul class="sub-categories">
+                  <li><a href="search.php?time=15">Under 15 minutes</a></li>
+                  <li><a href="search.php?time=30">Under 30 minutes</a></li>
+                </ul>
+              </li>
+
             </ul>
           </li>
 
@@ -635,6 +733,15 @@ $result = $conn->query($sql);
 </footer>
 
 <script>
+  
+document.querySelectorAll(".category-title").forEach(title => {
+    title.addEventListener("click", function () {
+      const category = this.parentElement;
+      category.classList.toggle("open");
+    });
+  });
+
+
 // existing icons toggle (like/bookmark)
 document.querySelectorAll('.card-icons i').forEach(icon=>{
   icon.addEventListener('click', function(e){
