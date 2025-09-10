@@ -214,180 +214,205 @@ $result = $conn->query($sql);
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Poppins',sans-serif;background:#f9f9f9;color:#222;overflow-x:hidden}
 
-/* Transparent header */
-.transparent-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(0,0,0,0.4);
-  padding: 15px 40px;
-  z-index: 1000;
-}
+    /* ---------------- SPLASH SCREEN ---------------- */
+    #splash {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    #splash img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      animation: zoomIn 1.5s ease-in-out;
+      object-fit: cover;
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    #splash.fade-out {
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      pointer-events: none;
+    }
+    /* ---------------- END SPLASH ---------------- */
 
-.transparent-header .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
-}
+    /* Transparent header */
+    .transparent-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      padding: 15px 40px;
+      z-index: 1000;
+    }
 
-.transparent-header .logo {
-  font-size: 28px;
-  font-weight: bold;
-  color: #b0c364;
-  font-family: 'Poppins', sans-serif;
-}
+    .transparent-header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
 
-/* Nav links */
-.nav-links ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
+    .transparent-header .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #b0c364;
+      font-family: 'Poppins', sans-serif;
+    }
 
-.nav-links ul li {
-  position: relative;
-  margin-left: 25px;
-}
+    /* Nav links */
+    .nav-links ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+    }
 
-.nav-links ul li a {
-  text-decoration: none;
-  color: #fff;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  padding: 6px 10px;
-  transition: color 0.3s ease;
-}
+    .nav-links ul li {
+      position: relative;
+      margin-left: 25px;
+    }
 
-.nav-links ul li a:hover {
-  color: #B0C364;
-}
+    .nav-links ul li a {
+      text-decoration: none;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      font-size: 16px;
+      padding: 6px 10px;
+      transition: color 0.3s ease;
+    }
 
-/* Dropdown Menu Container */
-.nav-links ul li ul.dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: rgba(255, 255, 255, 0.4); /* light transparent */
-  padding: 15px;
-  list-style: none;
-  width: 280px;
-  max-height: 400px;
-  overflow-y: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 999;
-  backdrop-filter: blur(6px); /* subtle blur to enhance transparency */
-}
+    .nav-links ul li a:hover {
+      color: #B0C364;
+    }
 
-/* Show dropdown on hover */
-.nav-links ul li.dropdown:hover ul.dropdown-menu {
-  display: block;
-}
+    /* Dropdown Menu Container */
+    .nav-links ul li ul.dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: rgba(255, 255, 255, 0.4); /* light transparent */
+      padding: 15px;
+      list-style: none;
+      width: 280px;
+      max-height: 400px;
+      overflow-y: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 999;
+      backdrop-filter: blur(6px); /* subtle blur to enhance transparency */
+    }
 
-/* Category container */
-.category {
-  display: block;
-  margin-bottom: 10px;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
-  padding-bottom: 6px;
-}
+    /* Show dropdown on hover */
+    .nav-links ul li.dropdown:hover ul.dropdown-menu {
+      display: block;
+    }
 
-/* Category title styling */
-.category-title {
-  font-family: 'Poppins', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 8px 12px;
-  color: #B0C364; /* olive green */
-  background: rgba(246, 246, 246, 0.94); /* subtle transparent bg */
-  border-radius: 5px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background 0.3s ease, color 0.3s ease;
-}
+    /* Category container */
+    .category {
+      display: block;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      padding-bottom: 6px;
+    }
 
-.category-title:hover {
-  background: rgba(176, 195, 100, 0.15); /* slightly darker transparent bg */
-  color: #566711; /* darker olive green on hover */
-}
+    /* Category title styling */
+    .category-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 8px 12px;
+      color: #B0C364; /* olive green */
+      background: rgba(246, 246, 246, 0.94); /* subtle transparent bg */
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
 
-/* Arrow icon */
-.category-title .arrow {
-  font-size: 12px;
-  transition: transform 0.3s ease;
-}
+    .category-title:hover {
+      background: rgba(176, 195, 100, 0.15); /* slightly darker transparent bg */
+      color: #566711; /* darker olive green on hover */
+    }
 
-.category.open .category-title .arrow {
-  transform: rotate(90deg);
-}
+    /* Arrow icon */
+    .category-title .arrow {
+      font-size: 12px;
+      transition: transform 0.3s ease;
+    }
 
-/* Subcategories hidden by default */
-.sub-categories {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  margin: 6px 0 0 12px;
-  padding-left: 0;
-  list-style: none;
-  display: block;
-  flex-direction: column;
-}
+    .category.open .category-title .arrow {
+      transform: rotate(90deg);
+    }
 
-/* Show subcategories when open */
-.category.open .sub-categories {
-  max-height: 500px;
-  display: block;
-}
+    /* Subcategories hidden by default */
+    .sub-categories {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      margin: 6px 0 0 12px;
+      padding-left: 0;
+      list-style: none;
+      display: block;
+      flex-direction: column;
+    }
 
-/* Each subcategory */
-.sub-categories li {
-  display: block;
-  margin: 4px 0;
-}
+    /* Show subcategories when open */
+    .category.open .sub-categories {
+      max-height: 500px;
+      display: block;
+    }
 
-.sub-categories li a {
-  display: block;
-  padding: 6px 12px;
-  font-size: 14px;
-  text-decoration: none;
-  color: #B0C364; /* olive green text */
-  font-family: 'Poppins', sans-serif;
-  border-radius: 4px;
-  transition: background 0.2s ease, color 0.2s ease;
-  width: 100%;
-}
+    /* Each subcategory */
+    .sub-categories li {
+      display: block;
+      margin: 4px 0;
+    }
 
-.sub-categories li a:hover {
-  background: rgba(176, 195, 100, 0.15); /* slightly darker transparent bg */
-  color: #566711; /* darker olive green text */
-}
+    .sub-categories li a {
+      display: block;
+      padding: 6px 12px;
+      font-size: 14px;
+      text-decoration: none;
+      color: #B0C364; /* olive green text */
+      font-family: 'Poppins', sans-serif;
+      border-radius: 4px;
+      transition: background 0.2s ease, color 0.2s ease;
+      width: 100%;
+    }
 
-/* Optional scrollbar styling for dropdown */
-.nav-links ul li ul.dropdown-menu::-webkit-scrollbar {
-  width: 6px;
-}
+    .sub-categories li a:hover {
+      background: rgba(176, 195, 100, 0.15); /* slightly darker transparent bg */
+      color: #566711; /* darker olive green text */
+    }
 
-.nav-links ul li ul.dropdown-menu::-webkit-scrollbar-thumb {
-  background: rgba(176, 195, 100, 0.4);
-  border-radius: 3px;
-}
+    /* Optional scrollbar styling for dropdown */
+    .nav-links ul li ul.dropdown-menu::-webkit-scrollbar {
+      width: 6px;
+    }
 
-.nav-links ul li ul.dropdown-menu::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-}
+    .nav-links ul li ul.dropdown-menu::-webkit-scrollbar-thumb {
+      background: rgba(176, 195, 100, 0.4);
+      border-radius: 3px;
+    }
 
-
-
-
+    .nav-links ul li ul.dropdown-menu::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
 
     .hero{height:100vh;position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden}
     .hero video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
@@ -400,91 +425,89 @@ $result = $conn->query($sql);
 
     /* MEAL PLANNER (carousel-like) */
     .meal-planner-banner {
-  position: relative;
-  width: 100%;
-  height: 90vh;
-  overflow: hidden;
-  font-family: 'Poppins', sans-serif;
-}
+      position: relative;
+      width: 100%;
+      height: 90vh;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+    }
 
-.meal-planner-banner .slider {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform 1s ease-in-out;
-}
+    .meal-planner-banner .slider {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 1s ease-in-out;
+    }
 
-.meal-planner-banner .slide {
-  min-width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+    .meal-planner-banner .slide {
+      min-width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-.meal-planner-banner .overlay {
-  background: rgba(0, 0, 0, 0.6);
-  padding: 40px 60px;
-  border-radius: 20px;
-  text-align: center;
-  color: #fff;
-  max-width: 650px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}
+    .meal-planner-banner .overlay {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 40px 60px;
+      border-radius: 20px;
+      text-align: center;
+      color: #fff;
+      max-width: 650px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
 
-.meal-planner-banner h2 {
-  font-size: 2.5rem;
-  margin-bottom: 15px;
-}
+    .meal-planner-banner h2 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
 
-.meal-planner-banner p {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  line-height: 1.6;
-}
+    .meal-planner-banner p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
 
-.meal-planner-banner button {
-  background: #B0C364;
-  color: #fff;
-  padding: 12px 25px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
+    .meal-planner-banner button {
+      background: #B0C364;
+      color: #fff;
+      padding: 12px 25px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
 
-.meal-planner-banner button:hover {
-  background: #9bb14c;
-}
+    .meal-planner-banner button:hover {
+      background: #9bb14c;
+    }
 
-/* Dots */
-.meal-planner-banner .controls {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-}
+    /* Dots */
+    .meal-planner-banner .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
 
-.meal-planner-banner .dot {
-  height: 14px;
-  width: 14px;
-  margin: 0 6px;
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  display: inline-block;
-  cursor: pointer;
-  transition: background-color 0.4s;
-}
+    .meal-planner-banner .dot {
+      height: 14px;
+      width: 14px;
+      margin: 0 6px;
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      display: inline-block;
+      cursor: pointer;
+      transition: background-color 0.4s;
+    }
 
-.meal-planner-banner .dot.active {
-  background-color: #B0C364;
-}
+    .meal-planner-banner .dot.active {
+      background-color: #B0C364;
+    }
 
-
-  
     /* RECIPES */
     .recipes{background:#fff;padding:56px 10%;text-align:center}
     .recipes h2{font-size:28px;margin-bottom:28px;font-weight:600}
@@ -530,6 +553,11 @@ $result = $conn->query($sql);
   </style>
 </head>
 <body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <img src="img/logo.png" alt="TasteIt Logo">
+</div>
 
 <header class="transparent-header">
   <div class="container">
@@ -733,7 +761,17 @@ $result = $conn->query($sql);
 </footer>
 
 <script>
-  
+  // --- SPLASH LOGIC ---
+  window.addEventListener("load", () => {
+    const splash = document.getElementById("splash");
+    if (splash) {
+      setTimeout(() => {
+        splash.classList.add("fade-out");
+        setTimeout(() => splash.style.display = "none", 800);
+      }, 2500); // 2.5s
+    }
+  });
+
 document.querySelectorAll(".category-title").forEach(title => {
     title.addEventListener("click", function () {
       const category = this.parentElement;
