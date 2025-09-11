@@ -85,6 +85,36 @@ $sql_comments = "SELECT c.comment_text, u.username
                  WHERE c.recipe_id=$id 
                  ORDER BY c.created_at DESC";
 $res_comments = $conn->query($sql_comments);
+
+// --- Ratings ---
+$res_rating = $conn->query("SELECT AVG(rating) as avg_rating, COUNT(*) as total_ratings FROM recipe_ratings WHERE recipe_id=$id");
+$rating_data = $res_rating->fetch_assoc();
+$avg_rating = round($rating_data['avg_rating'],1);
+$total_ratings = $rating_data['total_ratings'];
+
+// Handle rating submission
+if(isset($_POST['rating']) && isset($_SESSION['user_id'])){
+    $user_id = $_SESSION['user_id'];
+    $rating_value = intval($_POST['rating']);
+    $check = $conn->query("SELECT * FROM recipe_ratings WHERE user_id=$user_id AND recipe_id=$id");
+    if($check->num_rows > 0){
+        $conn->query("UPDATE recipe_ratings SET rating=$rating_value, rated_at=NOW() WHERE user_id=$user_id AND recipe_id=$id");
+    } else {
+        $conn->query("INSERT INTO recipe_ratings (recipe_id,user_id,rating) VALUES ($id,$user_id,$rating_value)");
+    }
+    echo "<script>window.location.href='view_recipe.php?id=$id';</script>";
+    exit;
+}
+
+// Fetch user's previous rating
+$user_rating = 0;
+if(isset($_SESSION['user_id'])){
+    $user_id = $_SESSION['user_id'];
+    $res_user_rating = $conn->query("SELECT rating FROM recipe_ratings WHERE recipe_id=$id AND user_id=$user_id");
+    if($res_user_rating->num_rows > 0){
+        $user_rating = intval($res_user_rating->fetch_assoc()['rating']);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -121,25 +151,9 @@ $res_comments = $conn->query($sql_comments);
     .comment {background:#f3f3f3; padding:8px; margin:5px 0; border-radius:6px;}
 
     /* Uploaded By Card */
-    .uploader-card {
-        display:flex;
-        align-items:center;
-        background:#f3f3f3;
-        padding:12px;
-        border-radius:8px;
-        margin-top:20px;
-        transition:0.2s;
-        cursor:pointer;
-    }
+    .uploader-card {display:flex; align-items:center; background:#f3f3f3; padding:12px; border-radius:8px; margin-top:20px; transition:0.2s; cursor:pointer;}
     .uploader-card:hover {background:#e0e0e0;}
-    .uploader-card img {
-        width:50px;
-        height:50px;
-        border-radius:50%;
-        margin-right:15px;
-        object-fit:cover;
-        border:2px solid #5A6E2D;
-    }
+    .uploader-card img {width:50px; height:50px; border-radius:50%; margin-right:15px; object-fit:cover; border:2px solid #5A6E2D;}
     .uploader-card h3 {margin:0; font-size:18px; color:#333;}
     .uploader-card p {margin:2px 0 0; font-size:14px; color:#666;}
 
@@ -148,36 +162,79 @@ $res_comments = $conn->query($sql_comments);
     .categories li {margin-bottom:8px;}
     .categories a {color:#B0C364; text-decoration:none; font-weight:500;}
     .categories a:hover {text-decoration:underline;}
+
+    /* Ratings */
+    .star-rating {font-size:28px; color:#ccc; cursor:pointer;}
+    .star-rating .star:hover,
+    .star-rating .star.hover,
+    .star-rating .star.selected {color:#B0C364; transition:0.2s;}
   </style>
 </head>
 <body>
-  <div class="container">
+<div class="container">
     <h1><?php echo $title; ?></h1>
     <img src="<?php echo $img; ?>" alt="<?php echo $title; ?>">
 
+    <!-- Categories -->
     <div class="section categories">
       <h2>📂 Categories</h2>
       <ul>
-        <?php if ($cuisine): ?>
-          <li>Cuisine: <a href="search.php?cuisine=<?php echo urlencode($cuisine); ?>"><?php echo $cuisine; ?></a></li>
-        <?php endif; ?>
-        <?php if ($course): ?>
-          <li>Course: <a href="search.php?course=<?php echo urlencode($course); ?>"><?php echo $course; ?></a></li>
-        <?php endif; ?>
-        <?php if ($diet): ?>
-          <li>Diet: <a href="search.php?diet=<?php echo urlencode($diet); ?>"><?php echo $diet; ?></a></li>
-        <?php endif; ?>
-        <?php if ($quick): ?>
-          <li>Quick Recipe: <a href="search.php?quick=<?php echo urlencode($quick); ?>"><?php echo $quick; ?></a></li>
-        <?php endif; ?>
+        <?php if ($cuisine): ?><li>Cuisine: <a href="search.php?cuisine=<?php echo urlencode($cuisine); ?>"><?php echo $cuisine; ?></a></li><?php endif; ?>
+        <?php if ($course): ?><li>Course: <a href="search.php?course=<?php echo urlencode($course); ?>"><?php echo $course; ?></a></li><?php endif; ?>
+        <?php if ($diet): ?><li>Diet: <a href="search.php?diet=<?php echo urlencode($diet); ?>"><?php echo $diet; ?></a></li><?php endif; ?>
+        <?php if ($quick): ?><li>Quick Recipe: <a href="search.php?quick=<?php echo urlencode($quick); ?>"><?php echo $quick; ?></a></li><?php endif; ?>
       </ul>
     </div>
 
+    <!-- Ratings -->
+    <div class="section">
+      <h2>⭐ Rating</h2>
+      <p>Average Rating: <b><?php echo $avg_rating; ?></b> (<?php echo $total_ratings; ?> ratings)</p>
+      <form method="post" id="ratingForm">
+        <div class="star-rating">
+          <?php for($i=1;$i<=5;$i++): ?>
+            <span class="star <?php echo ($i <= $user_rating) ? 'selected' : ''; ?>" data-value="<?php echo $i; ?>">&#9733;</span>
+          <?php endfor; ?>
+        </div>
+        <?php if(isset($_SESSION['user_id'])): ?>
+          <input type="hidden" name="rating" id="ratingInput" value="<?php echo $user_rating; ?>">
+          <button type="submit" style="margin-top:10px; background:#B0C364; color:#fff; border:none; padding:8px 14px; border-radius:5px; cursor:pointer;">Submit Rating</button>
+        <?php endif; ?>
+      </form>
+    </div>
+
+    <script>
+      const stars = document.querySelectorAll('.star-rating .star');
+      <?php if(isset($_SESSION['user_id'])): ?>
+      const ratingInput = document.getElementById('ratingInput');
+      stars.forEach(star => {
+        star.addEventListener('mouseover', () => {
+          stars.forEach(s => s.classList.remove('hover'));
+          let val = parseInt(star.getAttribute('data-value'));
+          for(let i=0;i<val;i++) stars[i].classList.add('hover');
+        });
+        star.addEventListener('mouseout', () => { stars.forEach(s => s.classList.remove('hover')); });
+        star.addEventListener('click', () => {
+          let val = parseInt(star.getAttribute('data-value'));
+          ratingInput.value = val;
+          stars.forEach(s => s.classList.remove('selected'));
+          for(let i=0;i<val;i++) stars[i].classList.add('selected');
+        });
+      });
+      <?php else: ?>
+      stars.forEach(star => {
+        star.addEventListener('click', () => { alert('Please login to rate this recipe.'); });
+      });
+      <?php endif; ?>
+    </script>
+
+    <!-- Description -->
     <div class="section">
       <h2>Description</h2>
       <p><?php echo $desc; ?></p>
     </div>
 
+    <!-- Ingredients -->
     <div class="section">
       <h2>Ingredients</h2>
       <ul>
@@ -187,12 +244,13 @@ $res_comments = $conn->query($sql_comments);
       </ul>
     </div>
 
+    <!-- Steps -->
     <div class="section">
       <h2>Steps</h2>
       <p><?php echo $steps; ?></p>
     </div>
 
-    <!-- Uploaded By Card -->
+    <!-- Uploaded By -->
     <div class="section">
       <h2>👨‍🍳 Uploaded By</h2>
       <a href="profile.php?id=<?php echo $uploaded_by; ?>" style="text-decoration:none;">
@@ -206,13 +264,13 @@ $res_comments = $conn->query($sql_comments);
       </a>
     </div>
 
+  
+
+    <!-- Buy Ingredients -->
     <div class="section">
       <h2>🛒 Buy Ingredients</h2>
       <table>
-        <tr>
-          <th>Ingredient</th>
-          <th>Buy Links</th>
-        </tr>
+        <tr><th>Ingredient</th><th>Buy Links</th></tr>
         <?php foreach ($ingredients as $ing): 
             $ing = trim($ing);
             $search = urlencode($ing);
@@ -228,16 +286,13 @@ $res_comments = $conn->query($sql_comments);
       </table>
     </div>
 
+    <!-- Likes & Bookmarks -->
     <div class="section actions">
-      <form method="post">
-        <button type="submit" name="like">👍 Like (<?php echo $likes_count; ?>)</button>
-      </form>
-
-      <form method="post">
-        <button type="submit" name="bookmark">🔖 Save</button>
-      </form>
+      <form method="post"><button type="submit" name="like">👍 Like (<?php echo $likes_count; ?>)</button></form>
+      <form method="post"><button type="submit" name="bookmark">🔖 Save</button></form>
     </div>
 
+    <!-- Comments -->
     <div class="section comment-box">
       <h2>💬 Comments</h2>
       <form method="post">
@@ -251,6 +306,7 @@ $res_comments = $conn->query($sql_comments);
         <?php endwhile; ?>
       </div>
     </div>
-  </div>
+
+</div>
 </body>
 </html>
