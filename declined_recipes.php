@@ -23,7 +23,7 @@ $result = $conn->query("SELECT r.*, u.username
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rejected Recipes</title>
+  <title>Declined Recipes</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
     h2 { color: #B22222; }
@@ -36,7 +36,7 @@ $result = $conn->query("SELECT r.*, u.username
   </style>
 </head>
 <body>
-  <h2>❌ Rejected Recipes</h2>
+  <h2>❌ Declined Recipes</h2>
   <?php if ($result->num_rows > 0): ?>
       <?php while ($row = $result->fetch_assoc()): ?>
         <div class="card">
@@ -47,11 +47,11 @@ $result = $conn->query("SELECT r.*, u.username
           <?php if (!empty($row['image_path'])): ?>
             <img src="<?php echo $row['image_path']; ?>" alt="Recipe Image">
           <?php endif; ?>
-          <p style="color: red; font-weight: bold;">This recipe was rejected by the admin.</p>
+          <p style="color: red; font-weight: bold;">This recipe was declined by the admin.</p>
         </div>
       <?php endwhile; ?>
   <?php else: ?>
-    <p>No rejected recipes available.</p>
+    <p><strong>No declined recipes in the past 24 hours.</strong></p>
   <?php endif; ?>
 </body>
 </html>
