@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 if (!isset($_SESSION['admin_email'])) {
@@ -13,7 +12,6 @@ if ($conn->connect_error) {
 
 // 🔥 Auto delete rejected recipes older than 1 day
 $conn->query("DELETE FROM recipes WHERE status='rejected' AND TIMESTAMPDIFF(DAY, updated_at, NOW()) >= 1");
-
 
 // Stats
 $userCount = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
@@ -165,18 +163,46 @@ $topUsers = $conn->query("
       margin-bottom: 15px;
     }
 
-    .section ul {
-      list-style: none;
-      padding-left: 0;
+    /* ✅ Recent Activity Styling */
+    .activity-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
 
-    .section li {
-      margin-bottom: 10px;
+    .activity-card {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease;
+    }
+
+    .activity-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .activity-icon {
+      font-size: 22px;
+      margin-right: 15px;
+    }
+
+    .activity-details {
+      font-size: 14px;
       color: #333;
     }
 
-    .section li em {
-      color: #555;
+    .activity-details em {
+      color: #5A6E2D;
+      font-weight: 600;
+    }
+
+    .activity-details .time {
+      font-size: 12px;
+      color: #777;
     }
   </style>
 </head>
@@ -197,10 +223,10 @@ $topUsers = $conn->query("
     </div>
 
     <div class="summary-cards">
-    <a href="most_liked_recipe.php" class="card">
-  <h3>⭐ Most Liked Recipe</h3>
-  <p><?php echo htmlspecialchars($mostLikedTitle) . " ($mostLikedLikes likes)"; ?></p>
-</a>
+      <a href="most_liked_recipe.php" class="card">
+        <h3>⭐ Most Liked Recipe</h3>
+        <p><?php echo htmlspecialchars($mostLikedTitle) . " ($mostLikedLikes likes)"; ?></p>
+      </a>
 
       <a href="approved_recipes.php" class="card">
         <h3>🍽️ Approved Recipes</h3>
@@ -224,15 +250,26 @@ $topUsers = $conn->query("
       </a>
     </div>
 
+    <!-- ✅ Stylish Recent Activity -->
     <div class="section">
-      <a href="recent_activity.php" class="card">
       <h3>🕒 Recent Activity</h3>
-      </a>
-      <ul>
-        <?php while ($row = $recent->fetch_assoc()): ?>
-          <li><strong><?php echo htmlspecialchars($row['username']); ?></strong> uploaded <em><?php echo htmlspecialchars($row['title']); ?></em> on <?php echo date("M d, Y H:i", strtotime($row['created_at'])); ?></li>
-        <?php endwhile; ?>
-      </ul>
+      <div class="activity-container">
+        <?php if ($recent->num_rows > 0): ?>
+          <?php while ($row = $recent->fetch_assoc()): ?>
+            <div class="activity-card">
+              <div class="activity-icon">📌</div>
+              <div class="activity-details">
+                <strong><?php echo htmlspecialchars($row['username']); ?></strong> 
+                uploaded <em><?php echo htmlspecialchars($row['title']); ?></em> 
+                <br>
+                <span class="time"><?php echo date("M d, Y H:i", strtotime($row['created_at'])); ?></span>
+              </div>
+            </div>
+          <?php endwhile; ?>
+        <?php else: ?>
+          <p>No recent activity.</p>
+        <?php endif; ?>
+      </div>
     </div>
 
     <div class="section">
