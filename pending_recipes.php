@@ -17,7 +17,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
   } elseif ($action === 'decline') {
     $conn->query("UPDATE recipes SET status='declined' WHERE id=$id");
   }
-  header("Location: pending_recipes.php");
+  // ✅ Redirect without adding extra history entries
+  header("Location: pending_recipes.php", true, 303);
   exit();
 }
 
@@ -37,7 +38,20 @@ $result = $conn->query($sql);
       padding: 30px; 
       background-color: #fdfaf5; 
     }
-    h2 { color: #B05D57; }
+    h2 { 
+      color: #B05D57; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+    }
+    .dashboard-btn {
+      background: #B05D57; 
+      color: #fff; 
+      padding: 8px 16px; 
+      border-radius: 6px; 
+      text-decoration: none; 
+      font-weight: 600;
+    }
 
     .recipe {
       display: flex;
@@ -74,7 +88,10 @@ $result = $conn->query($sql);
 </head>
 <body>
 
-<h2>📌 Pending Recipes</h2>
+<h2>
+  📌 Pending Recipes
+  <a href="admin_dashboard.php" class="dashboard-btn">Go to Dashboard</a>
+</h2>
 
 <?php if ($result->num_rows > 0): ?>
   <?php while ($row = $result->fetch_assoc()): ?>
