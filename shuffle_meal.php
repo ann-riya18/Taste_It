@@ -1,39 +1,49 @@
 <?php
-session_start();
 include 'db.php';
+session_start();
 
-$day = $_GET['day'] ?? '';
-$course = $_GET['course'] ?? '';
-
-if(!$day || !$course){
-    echo json_encode(['error'=>'Invalid parameters']);
-    exit;
+if (!isset($_SESSION['user_id'])) {
+    die("Login required.");
 }
 
-// Get used recipes in this week
-$used_recipes = [];
-if(isset($_SESSION['meal_plan'])){
-    foreach($_SESSION['meal_plan'] as $d => $courses){
-        foreach($courses as $c => $recipe){
-            $used_recipes[] = $recipe['id'];
+$user_id = $_SESSION['user_id'];
+$week_number = date("W"); // ISO week number
+
+// Check if already shuffled this week
+$check = $conn->prepare("SELECT * FROM shuffle_actions WHERE user_id=? AND week_number=?");
+$check->bind_param("ii", $user_id, $week_number);
+$check->execute();
+$result = $check->get_result();
+
+if ($result->num_rows > 0) {
+    echo "<div class='alert alert-warning text-center m-3'>
+            <strong>Note:</strong> You have already shuffled meals for this week.
+          </div>";
+} else {
+    $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    $courses = ['Breakfast','Lunch','Snacks','Dinner'];
+
+    foreach ($days as $day) {
+        foreach ($courses as $course) {
+            $query = $conn->query("SELECT id FROM recipes WHERE course='$course' ORDER BY RAND() LIMIT 1");
+            if ($query->num_rows > 0) {
+                $recipe = $query->fetch_assoc();
+                $recipe_id = $recipe['id'];
+                // Save into meal plan
+                $conn->query("UPDATE meal_plans 
+                              SET recipe_id=$recipe_id 
+                              WHERE user_id=$user_id AND week_number=$week_number AND day='$day' AND course='$course'");
+            }
         }
     }
-}
 
-// Fetch a random new recipe for this course not used this week
-$sql = "SELECT id, title, description, image_path 
-        FROM recipes 
-        WHERE course='$course' AND status='approved' 
-        ".(!empty($used_recipes) ? "AND id NOT IN (".implode(',',$used_recipes).")" : "")."
-        ORDER BY RAND() LIMIT 1";
+    // Save shuffle action
+    $insert = $conn->prepare("INSERT INTO shuffle_actions (user_id, week_number) VALUES (?, ?)");
+    $insert->bind_param("ii", $user_id, $week_number);
+    $insert->execute();
 
-$result = $conn->query($sql);
-if($result->num_rows > 0){
-    $new_meal = $result->fetch_assoc();
-    // Update session to include new recipe
-    $_SESSION['meal_plan'][$day][$course] = $new_meal;
-    echo json_encode($new_meal);
-}else{
-    echo json_encode(['error'=>'No more unique recipes available']);
+    echo "<div class='alert alert-success text-center m-3'>
+            Meals successfully shuffled for this week!
+          </div>";
 }
 ?>
