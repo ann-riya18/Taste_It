@@ -31,11 +31,12 @@ elseif (!empty($cuisine)) {
     $stmt = $conn->prepare("
         SELECT r.id, r.title, r.description, r.image_path 
         FROM recipes r 
-        WHERE r.cuisine = ? 
+        WHERE r.cuisine LIKE ? 
         AND r.status = 'approved'
         ORDER BY r.id DESC
     ");
-    $stmt->bind_param("s", $cuisine);
+    $cuisineLike = "%".$cuisine."%";
+    $stmt->bind_param("s", $cuisineLike);
     $stmt->execute();
     $result = $stmt->get_result();
 }
@@ -44,11 +45,12 @@ elseif (!empty($course)) {
     $stmt = $conn->prepare("
         SELECT r.id, r.title, r.description, r.image_path 
         FROM recipes r 
-        WHERE r.course = ? 
+        WHERE r.course LIKE ? 
         AND r.status = 'approved'
         ORDER BY r.id DESC
     ");
-    $stmt->bind_param("s", $course);
+    $courseLike = "%".$course."%";
+    $stmt->bind_param("s", $courseLike);
     $stmt->execute();
     $result = $stmt->get_result();
 }
@@ -57,11 +59,12 @@ elseif (!empty($diet)) {
     $stmt = $conn->prepare("
         SELECT r.id, r.title, r.description, r.image_path 
         FROM recipes r 
-        WHERE r.diet = ? 
+        WHERE r.diet LIKE ? 
         AND r.status = 'approved'
         ORDER BY r.id DESC
     ");
-    $stmt->bind_param("s", $diet);
+    $dietLike = "%".$diet."%";
+    $stmt->bind_param("s", $dietLike);
     $stmt->execute();
     $result = $stmt->get_result();
 }

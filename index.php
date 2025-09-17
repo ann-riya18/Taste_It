@@ -202,11 +202,10 @@ $result = $conn->query($sql);
     .hero{height:100vh;position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden}
     .hero video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
     .hero::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:2}
-    .hero-content{position:relative;z-index:3;background:rgba(176,195,100,0.8);padding:20px 40px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.3);text-align:center}
-    .hero-content h2{color:#fff;font-size:50px;font-weight:bold}
-    .hero-content p {color:#fff;font-size:18px;margin:15px 0;}
-    .hero-content .btn {display:inline-block;padding:12px 28px;background-color:#B0C364;color:#fff;text-decoration:none;border-radius:8px;font-weight:500;transition:0.3s;}
-    .hero-content .btn:hover {background-color:#97b24e;}
+    .hero-content{position:relative;z-index:3;background:rgba(0,0,0,0.5);backdrop-filter:blur(5px);padding:30px 40px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.3);text-align:center;max-width:800px}
+    .hero-icon{font-size:40px;color:#B0C364;margin-bottom:10px;background:rgba(255,255,255,0.9);width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 15px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+    .hero-content h2{color:#fff;font-size:50px;font-weight:700;margin-bottom:12px;text-shadow:0 2px 4px rgba(0,0,0,0.3)}
+    .hero-content p {color:#fff;font-size:18px;line-height:1.4;margin-bottom:15px;max-width:600px;margin-left:auto;margin-right:auto}
      
    body, html {
   margin: 0;
@@ -397,11 +396,12 @@ $result = $conn->query($sql);
     .card-icons i.saved {color:#b0c364;}
     .card-icons i:hover{color:#222;}
     /* ABOUT */
-    .about{background:#f3f3f3;text-align:center;padding:56px 10%}
-    .about h2{font-size:28px;margin-bottom:16px}
-    .about p{max-width:720px;margin:0 auto;color:#555;line-height:1.7}
+    .about{background:linear-gradient(to bottom, #f8f8f8, #f0f0f0);text-align:center;padding:60px 10%;border-top:1px solid #e0e0e0}
+    .about h2{font-size:32px;margin-bottom:20px;color:#333;position:relative;display:inline-block}
+    .about h2:after{content:"";position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:60px;height:3px;background:#B0C364}
+    .about p{max-width:800px;margin:0 auto;color:#555;line-height:1.8;font-size:18px}
     /* FOOTER */
-    footer{background:#222;color:#fff;padding:40px 10% 20px}
+    footer{background:#1a1a1a;color:#fff;padding:50px 10% 20px;border-top:3px solid #B0C364}
     .footer-container{display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px}
     .footer-logo{font-size:24px;font-weight:bold;color:#B0C364;margin-bottom:10px}
     .footer-section h4{font-size:18px;margin-bottom:12px;color:#B0C364}
@@ -411,7 +411,7 @@ $result = $conn->query($sql);
     .footer-section ul li a:hover{color:#B0C364}
     .social-icons a{color:#fff;margin-right:12px;font-size:20px;transition:0.3s}
     .social-icons a:hover{color:#B0C364}
-    .footer-bottom{text-align:center;margin-top:30px;font-size:14px;color:#aaa}
+    .footer-bottom{text-align:center;margin-top:40px;font-size:14px;color:#aaa;padding-top:20px;border-top:1px solid #333}
     /* responsive tweaks */
     @media (max-width: 980px) {
       .grid{grid-template-columns:repeat(2,1fr)}
@@ -549,9 +549,12 @@ $result = $conn->query($sql);
     <source src="img/bgvideo.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
+    <div class="hero-icon">
+      <i class="fas fa-utensils"></i>
+    </div>
     <h2>Welcome to TasteIt</h2>
     <p>Discover delicious recipes from around the world</p>
-    <a href="search.php" class="btn">Explore Recipes</a>
+    <a href="search.php" class="planner-btn">Explore Recipes</a>
   </div>
 </section>
 <!-- MEAL PLANNER SECTION - FULL WIDTH SLIDER -->
@@ -636,7 +639,7 @@ $result = $conn->query($sql);
 <section id="about" class="about">
   <h2>About TasteIt</h2>
   <p>
-    TasteIt is a platform for food lovers to discover, share, and enjoy recipes from all over the world.
+    TasteIt is a premier culinary platform connecting food enthusiasts with diverse recipes from around the globe. Our mission is to inspire creativity in the kitchen and make cooking an enjoyable experience for everyone.
   </p>
 </section>
 <!-- FOOTER -->
@@ -644,22 +647,22 @@ $result = $conn->query($sql);
   <div class="footer-container">
     <div class="footer-section">
       <div class="footer-logo">TasteIt</div>
-      <p>Discover, share, and enjoy recipes from around the world.</p>
+      <p>Your gateway to culinary exploration and delicious discoveries.</p>
     </div>
     <div class="footer-section">
       <h4>Quick Links</h4>
       <ul>
         <li><a href="index.php">Home</a></li>
-        <li><a href="#recipe">Recipes</a></li>
+        <li><a href="search.php">Recipes</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="login.html">Login</a></li>
       </ul>
     </div>
     <div class="footer-section">
-      <h4>Follow Us</h4>
+      <h4>Connect With Us</h4>
       <div class="social-icons">
         <a href="#"><i class="fab fa-facebook"></i></a>
-        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.instagram.com/__tasteit.__/" target="_blank"><i class="fab fa-instagram"></i></a>
         <a href="#"><i class="fab fa-twitter"></i></a>
       </div>
     </div>
