@@ -6,6 +6,10 @@ if ($conn->connect_error) {
 }
 
 $searchTerm = $_GET['q'] ?? '';
+$cuisine = $_GET['cuisine'] ?? '';
+$course = $_GET['course'] ?? '';
+$diet = $_GET['diet'] ?? '';
+$timeFilter = $_GET['time'] ?? '';
 
 // If search term exists → search in recipes & chefs
 if (!empty($searchTerm)) {
@@ -21,7 +25,60 @@ if (!empty($searchTerm)) {
     $stmt->bind_param("ss", $like, $like);
     $stmt->execute();
     $result = $stmt->get_result();
-} else {
+} 
+// If cuisine filter exists → filter by cuisine
+elseif (!empty($cuisine)) {
+    $stmt = $conn->prepare("
+        SELECT r.id, r.title, r.description, r.image_path 
+        FROM recipes r 
+        WHERE r.cuisine = ? 
+        AND r.status = 'approved'
+        ORDER BY r.id DESC
+    ");
+    $stmt->bind_param("s", $cuisine);
+    $stmt->execute();
+    $result = $stmt->get_result();
+}
+// If course filter exists → filter by course
+elseif (!empty($course)) {
+    $stmt = $conn->prepare("
+        SELECT r.id, r.title, r.description, r.image_path 
+        FROM recipes r 
+        WHERE r.course = ? 
+        AND r.status = 'approved'
+        ORDER BY r.id DESC
+    ");
+    $stmt->bind_param("s", $course);
+    $stmt->execute();
+    $result = $stmt->get_result();
+}
+// If diet filter exists → filter by diet
+elseif (!empty($diet)) {
+    $stmt = $conn->prepare("
+        SELECT r.id, r.title, r.description, r.image_path 
+        FROM recipes r 
+        WHERE r.diet = ? 
+        AND r.status = 'approved'
+        ORDER BY r.id DESC
+    ");
+    $stmt->bind_param("s", $diet);
+    $stmt->execute();
+    $result = $stmt->get_result();
+}
+// If time filter exists → filter by cooking time
+elseif (!empty($timeFilter)) {
+    $stmt = $conn->prepare("
+        SELECT r.id, r.title, r.description, r.image_path 
+        FROM recipes r 
+        WHERE r.cooking_time <= ? 
+        AND r.status = 'approved'
+        ORDER BY r.id DESC
+    ");
+    $stmt->bind_param("i", $timeFilter);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} 
+else {
     // Otherwise → show 6 latest approved recipes
     $sql = "SELECT id, title, description, image_path 
             FROM recipes 
@@ -95,10 +152,18 @@ if (!empty($searchTerm)) {
     <button type="submit">Search</button>
   </form>
 
-  <?php if (empty($searchTerm)) { ?>
-    <h3>Popular Recipes</h3>
-  <?php } else { ?>
+  <?php if (!empty($searchTerm)) { ?>
     <h3>Search Results for "<?php echo htmlspecialchars($searchTerm); ?>"</h3>
+  <?php } elseif (!empty($cuisine)) { ?>
+    <h3><?php echo htmlspecialchars($cuisine); ?> Cuisine Recipes</h3>
+  <?php } elseif (!empty($course)) { ?>
+    <h3><?php echo htmlspecialchars($course); ?> Recipes</h3>
+  <?php } elseif (!empty($diet)) { ?>
+    <h3><?php echo htmlspecialchars($diet); ?> Recipes</h3>
+  <?php } elseif (!empty($timeFilter)) { ?>
+    <h3>Recipes Under <?php echo htmlspecialchars($timeFilter); ?> Minutes</h3>
+  <?php } else { ?>
+    <h3>Popular Recipes</h3>
   <?php } ?>
 
   <div class="grid">
@@ -127,11 +192,6 @@ if (!empty($searchTerm)) {
     ?>
   </div>
 </section>
-
-<!-- FOOTER -->
-<footer>
-  <p>&copy; <?php echo date('Y'); ?> TasteIt. All Rights Reserved.</p>
-</footer>
 
 </body>
 </html>
