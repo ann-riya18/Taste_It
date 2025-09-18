@@ -14,7 +14,7 @@ $timeFilter = $_GET['time'] ?? '';
 // If search term exists → search in recipes & chefs
 if (!empty($searchTerm)) {
     $stmt = $conn->prepare("
-        SELECT r.id, r.title, r.description, r.image_path 
+        SELECT r.id, r.title, r.description, r.image_path, u.username
         FROM recipes r 
         JOIN users u ON r.user_id = u.id 
         WHERE (r.title LIKE ? OR u.username LIKE ?) 
@@ -29,8 +29,9 @@ if (!empty($searchTerm)) {
 // If cuisine filter exists → filter by cuisine
 elseif (!empty($cuisine)) {
     $stmt = $conn->prepare("
-        SELECT r.id, r.title, r.description, r.image_path 
+        SELECT r.id, r.title, r.description, r.image_path, u.username
         FROM recipes r 
+        JOIN users u ON r.user_id = u.id
         WHERE r.cuisine LIKE ? 
         AND r.status = 'approved'
         ORDER BY r.id DESC
@@ -43,8 +44,9 @@ elseif (!empty($cuisine)) {
 // If course filter exists → filter by course
 elseif (!empty($course)) {
     $stmt = $conn->prepare("
-        SELECT r.id, r.title, r.description, r.image_path 
+        SELECT r.id, r.title, r.description, r.image_path, u.username
         FROM recipes r 
+        JOIN users u ON r.user_id = u.id
         WHERE r.course LIKE ? 
         AND r.status = 'approved'
         ORDER BY r.id DESC
@@ -57,8 +59,9 @@ elseif (!empty($course)) {
 // If diet filter exists → filter by diet
 elseif (!empty($diet)) {
     $stmt = $conn->prepare("
-        SELECT r.id, r.title, r.description, r.image_path 
+        SELECT r.id, r.title, r.description, r.image_path, u.username
         FROM recipes r 
+        JOIN users u ON r.user_id = u.id
         WHERE r.diet LIKE ? 
         AND r.status = 'approved'
         ORDER BY r.id DESC
@@ -71,8 +74,9 @@ elseif (!empty($diet)) {
 // If time filter exists → filter by cooking time
 elseif (!empty($timeFilter)) {
     $stmt = $conn->prepare("
-        SELECT r.id, r.title, r.description, r.image_path 
+        SELECT r.id, r.title, r.description, r.image_path, u.username
         FROM recipes r 
+        JOIN users u ON r.user_id = u.id
         WHERE r.cooking_time <= ? 
         AND r.status = 'approved'
         ORDER BY r.id DESC
@@ -83,10 +87,11 @@ elseif (!empty($timeFilter)) {
 } 
 else {
     // Otherwise → show 6 latest approved recipes
-    $sql = "SELECT id, title, description, image_path 
-            FROM recipes 
-            WHERE status = 'approved'
-            ORDER BY id DESC LIMIT 6";
+    $sql = "SELECT r.id, r.title, r.description, r.image_path, u.username 
+            FROM recipes r 
+            JOIN users u ON r.user_id = u.id
+            WHERE r.status = 'approved'
+            ORDER BY r.id DESC LIMIT 8";
     $result = $conn->query($sql);
 }
 ?>
@@ -100,7 +105,26 @@ else {
   <style>
     :root{ --brand:#B0C364; --text:#fff; --muted:#666; }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Poppins',sans-serif;background:#f9f9f9;color:#222;overflow-x:hidden}
+    body{
+      font-family:'Poppins',sans-serif;
+      background:#f9f9f9;
+      color:#222;
+      overflow-x:hidden;
+      background-image: url('img/bg20.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.7);
+      z-index: -1;
+    }
 
     /* HEADER */
     .transparent-header{position:fixed;top:0;left:0;width:100%;background:rgba(0,0,0,0.4);padding:15px 40px;z-index:1000}
@@ -113,9 +137,10 @@ else {
     /* SEARCH */
     .search-section{padding:120px 10% 40px;text-align:center}
     .search-section h2{font-size:28px;margin-bottom:20px}
-    .search-box{margin-bottom:30px}
-    .search-box input{padding:12px 20px;width:60%;max-width:500px;border:2px solid #ccc;border-radius:8px;font-size:16px}
-    .search-box button{padding:12px 24px;margin-left:10px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer}
+    .search-box{margin-bottom:30px;display:inline-block}
+    .search-box input{padding:15px 25px;width:400px;border:1px solid #ddd;border-radius:30px;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);outline:none}
+    .search-box input:focus{box-shadow:0 2px 12px rgba(176,195,100,0.3);border-color:var(--brand)}
+    .search-box button{padding:15px 30px;margin-left:-30px;background:var(--brand);color:#fff;border:none;border-radius:30px;font-size:16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
     .search-box button:hover{background:#97b24e}
 
     /* CARDS */
@@ -125,7 +150,7 @@ else {
     .card img{width:100%;height:180px;object-fit:cover}
     .card-body{padding:14px;text-align:left}
     .card-title{font-size:18px;color:#444;margin-bottom:8px}
-    .card-desc{font-size:14px;color:#666;line-height:1.45}
+    .card-chef{font-size:14px;color:#666;line-height:1.45}
 
     /* FOOTER */
     footer{background:var(--brand);color:#fff;text-align:center;padding:20px;margin-top:50px}
@@ -140,7 +165,6 @@ else {
     <nav>
       <ul>
         <li><a href="index.php">Home</a></li>
-        <li><a href="search.php">Explore Recipes</a></li>
         <li><a href="login.html">Login</a></li>
       </ul>
     </nav>
@@ -178,14 +202,14 @@ else {
         if ($img === '') { $img = 'img/placeholder.png'; }
         elseif (!preg_match('#^(https?://|/|uploads/)#i', $img)) { $img = 'uploads/'.$img; }
         $title = htmlspecialchars($row['title'] ?? 'Recipe', ENT_QUOTES, 'UTF-8');
-        $desc  = htmlspecialchars(mb_strimwidth($row['description'] ?? '', 0, 120, '...'), ENT_QUOTES, 'UTF-8');
+        $chef  = htmlspecialchars($row['username'] ?? 'Chef', ENT_QUOTES, 'UTF-8');
 
         echo "
         <a href='view_recipe.php?id={$id}' class='card'>
           <img src='{$img}' alt='{$title}'>
           <div class='card-body'>
             <div class='card-title'>{$title}</div>
-            <div class='card-desc'>{$desc}</div>
+            <div class='card-chef'>👨‍🍳 {$chef}</div>
           </div>
         </a>";
       }

@@ -210,7 +210,7 @@ $topUsers = $conn->query("
 
   <div class="sidebar">
     <h2>Admin Panel</h2>
-    <a href="recipe_requests.php">Pending Recipes</a>
+    <a href="index.php">Home</a>
     <a href="review_comments.php">Moderate Comments</a>
     <a href="graph_insights.php">Graphical Insights</a>
     <a href="admin_logout.php">Logout</a>
