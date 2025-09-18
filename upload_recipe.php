@@ -1,8 +1,5 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 session_start();
-
 if (!isset($_SESSION['user_email'])) {
     header("Location: user_login.html");
     exit();
@@ -13,24 +10,22 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get user ID
 $email = $_SESSION['user_email'];
 $result = $conn->query("SELECT id FROM users WHERE email = '$email'");
 $user = $result->fetch_assoc();
 $user_id = $user['id'];
 
-// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = $_POST['title'];
     $description = $_POST['description'];
     $ingredients = $_POST['ingredients'];
     $steps = $_POST['steps'];
-
-    // Collect category selections (optional)
-    $cuisine = $_POST['cuisine'] ?? '';
-    $course  = $_POST['course'] ?? '';
-    $diet    = $_POST['diet'] ?? '';
-    $quick_recipe = $_POST['quick_recipe'] ?? '';
+    
+    // Convert arrays to comma-separated strings
+    $cuisine = isset($_POST['cuisine']) ? implode(',', $_POST['cuisine']) : '';
+    $course = isset($_POST['course']) ? implode(',', $_POST['course']) : '';
+    $diet = isset($_POST['diet']) ? implode(',', $_POST['diet']) : '';
+    $quick_recipe = isset($_POST['quick_recipe']) ? implode(',', $_POST['quick_recipe']) : '';
 
     $image_path = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
@@ -47,11 +42,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                       $cuisine, $course, $diet, $quick_recipe, $image_path);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Recipe uploaded successfully! It will be reviewed by an admin.'); window.location.href='user_dashboard.php';</script>";
+        echo "<script>alert('Recipe uploaded successfully!'); window.location.href='user_dashboard.php';</script>";
     } else {
         echo "Error: " . $stmt->error;
     }
-
     $stmt->close();
 }
 ?>
@@ -60,174 +54,349 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upload Recipe | Taste It</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
-      background: #fff8f0;
-      padding: 40px;
+      background: url('img/bg28.jpg') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
     }
-
-    .container {
-      max-width: 750px;
-      margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.45);
+      z-index: -1;
     }
-
-    h2 {
+    
+    .form-wrapper {
+      width: 100%;
+      max-width: 700px;
+    }
+    
+    .form-header {
       text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .form-header h2 {
       color: #B0C364;
-    }
-
-    form {
-      margin-top: 30px;
-    }
-
-    label {
+      font-size: 28px;
       font-weight: 600;
-      display: block;
-      margin-top: 15px;
     }
-
+    
+    .form-row {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #B0C364;
+      padding-bottom: 15px;
+    }
+    
+    .form-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+    
     input[type="text"],
     textarea {
       width: 100%;
       padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      border: none;
+      background: transparent;
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
     }
-
-    input[type="file"] {
-      margin-top: 10px;
+    
+    textarea {
+      resize: vertical;
+      min-height: 70px;
     }
-
-    button {
-      margin-top: 25px;
-      padding: 12px 25px;
+    
+    .category-row {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #B0C364;
+      padding-bottom: 15px;
+    }
+    
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    
+    .category-header h3 {
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .category-header i {
+      color: #B0C364;
+    }
+    
+    .category-options {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .category-row.active .category-options {
+      display: flex;
+    }
+    
+    .category-option {
+      position: relative;
+    }
+    
+    .category-option input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+    }
+    
+    .category-option label {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #f5f5f5;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .category-option input[type="checkbox"]:checked + label {
+      background: #B0C364;
+      color: white;
+    }
+    
+    .file-upload {
+      position: relative;
+      display: block;
+    }
+    
+    .file-upload input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .file-upload-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      border: 2px dashed #B0C364;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .file-upload-label i {
+      font-size: 24px;
+      color: #B0C364;
+      margin-bottom: 8px;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
       background: #B0C364;
       color: white;
       border: none;
-      font-weight: bold;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    button:hover {
-      background: #98aa4f;
-    }
-
-    /* Category toggles */
-    .category-block {
-      margin-top: 20px;
-      border: 1px solid #ddd;
       border-radius: 8px;
-      padding: 15px;
-    }
-
-    .category-title {
+      font-size: 16px;
+      font-weight: 500;
       cursor: pointer;
-      font-weight: 600;
-      padding: 10px;
-      background: #f6f6f6;
-      border-radius: 5px;
-    }
-
-    .subcategory {
-      display: none;
-      margin-top: 10px;
-      padding-left: 15px;
-    }
-    .subcategory label {
-      font-weight: normal;
-      display: block;
-      margin: 5px 0;
-    }
-
-    .category-block.active .subcategory {
-      display: block;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <h2>Upload Your Recipe</h2>
+  <div class="overlay"></div>
+  
+  <div class="form-wrapper">
+    <div class="form-header">
+      <h2><i class="fas fa-utensils"></i> Upload Recipe</h2>
+    </div>
+    
     <form action="upload_recipe.php" method="POST" enctype="multipart/form-data">
-      <label>Title</label>
-      <input type="text" name="title" required>
+      <div class="form-row">
+        <label>Title</label>
+        <input type="text" name="title" placeholder="Recipe name" required>
+      </div>
 
-      <label>Description</label>
-      <textarea name="description" rows="3" required></textarea>
+      <div class="form-row">
+        <label>Description</label>
+        <input type="text" name="description" placeholder="Short description" required>
+      </div>
 
-      <label>Ingredients</label>
-      <textarea name="ingredients" rows="4" required></textarea>
+      <div class="form-row">
+        <label>Ingredients</label>
+        <textarea name="ingredients" placeholder="List ingredients" required></textarea>
+      </div>
 
-      <label>Steps</label>
-      <textarea name="steps" rows="5" required></textarea>
+      <div class="form-row">
+        <label>Steps</label>
+        <textarea name="steps" placeholder="Cooking instructions" required></textarea>
+      </div>
 
-      <!-- Main Categories -->
-      <div class="category-block">
-        <div class="category-title">Cuisine</div>
-        <div class="subcategory">
-          <label><input type="radio" name="cuisine" value="Indian"> Indian</label>
-          <label><input type="radio" name="cuisine" value="American"> American</label>
-          <label><input type="radio" name="cuisine" value="Chinese"> Chinese</label>
-          <label><input type="radio" name="cuisine" value="Mexican"> Mexican</label>
-          <label><input type="radio" name="cuisine" value="Asian"> Asian</label>
-          <label><input type="radio" name="cuisine" value="Middle Eastern"> Middle Eastern</label>
-          <label><input type="radio" name="cuisine" value="Continental"> Continental</label>
+      <div class="category-row">
+        <div class="category-header">
+          <h3>Cuisine</h3>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="category-options">
+          <div class="category-option">
+            <input type="checkbox" name="cuisine[]" value="Indian" id="indian">
+            <label for="indian">Indian</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="cuisine[]" value="American" id="american">
+            <label for="american">American</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="cuisine[]" value="Chinese" id="chinese">
+            <label for="chinese">Chinese</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="cuisine[]" value="Mexican" id="mexican">
+            <label for="mexican">Mexican</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="cuisine[]" value="Asian" id="asian">
+            <label for="asian">Asian</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="cuisine[]" value="Italian" id="italian">
+            <label for="italian">Italian</label>
+          </div>
         </div>
       </div>
 
-      <div class="category-block">
-        <div class="category-title">Course</div>
-        <div class="subcategory">
-          <label><input type="radio" name="course" value="Breakfast"> Breakfast</label>
-          <label><input type="radio" name="course" value="Lunch"> Lunch</label>
-          <label><input type="radio" name="course" value="Dinner"> Dinner</label>
-          <label><input type="radio" name="course" value="Snacks"> Snacks</label>
-          <label><input type="radio" name="course" value="Desserts"> Desserts</label>
-          <label><input type="radio" name="course" value="Drinks"> Drinks</label>
+      <div class="category-row">
+        <div class="category-header">
+          <h3>Course</h3>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="category-options">
+          <div class="category-option">
+            <input type="checkbox" name="course[]" value="Breakfast" id="breakfast">
+            <label for="breakfast">Breakfast</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="course[]" value="Lunch" id="lunch">
+            <label for="lunch">Lunch</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="course[]" value="Dinner" id="dinner">
+            <label for="dinner">Dinner</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="course[]" value="Snacks" id="snacks">
+            <label for="snacks">Snacks</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="course[]" value="Desserts" id="desserts">
+            <label for="desserts">Desserts</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="course[]" value="Drinks" id="drinks">
+            <label for="drinks">Drinks</label>
+          </div>
         </div>
       </div>
 
-      <div class="category-block">
-        <div class="category-title">Diet</div>
-        <div class="subcategory">
-          <label><input type="radio" name="diet" value="Gluten-Free"> Gluten-Free</label>
-          <label><input type="radio" name="diet" value="Lactose-Free"> Lactose-Free</label>
-          <label><input type="radio" name="diet" value="Sugar-Free"> Sugar-Free</label>
-          <label><input type="radio" name="diet" value="High-Protein"> High-Protein</label>
-          <label><input type="radio" name="diet" value="Low-Fat"> Low-Fat</label>
-          <label><input type="radio" name="diet" value="Low-Carb"> Low-Carb</label>
+      <div class="category-row">
+        <div class="category-header">
+          <h3>Diet</h3>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="category-options">
+          <div class="category-option">
+            <input type="checkbox" name="diet[]" value="Gluten-Free" id="gluten-free">
+            <label for="gluten-free">Gluten-Free</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="diet[]" value="Lactose-Free" id="lactose-free">
+            <label for="lactose-free">Lactose-Free</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="diet[]" value="Sugar-Free" id="sugar-free">
+            <label for="sugar-free">Sugar-Free</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="diet[]" value="High-Protein" id="high-protein">
+            <label for="high-protein">High-Protein</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="diet[]" value="Low-Fat" id="low-fat">
+            <label for="low-fat">Low-Fat</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="diet[]" value="Low-Carb" id="low-carb">
+            <label for="low-carb">Low-Carb</label>
+          </div>
         </div>
       </div>
 
-      <label>Quick Recipe</label>
-      <select name="quick_recipe">
-        <option value="">-- Select Time --</option>
-        <option value="Under 15 minutes">Under 15 minutes</option>
-        <option value="Under 30 minutes">Under 30 minutes</option>
-      </select>
+      <div class="category-row">
+        <div class="category-header">
+          <h3>Quick Recipe</h3>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="category-options">
+          <div class="category-option">
+            <input type="checkbox" name="quick_recipe[]" value="Under 15 mins" id="under15">
+            <label for="under15">Under 15 mins</label>
+          </div>
+          <div class="category-option">
+            <input type="checkbox" name="quick_recipe[]" value="Under 30 mins" id="under30">
+            <label for="under30">Under 30 mins</label>
+          </div>
+        </div>
+      </div>
 
-      <label>Upload Image</label>
-      <input type="file" name="image" accept="image/*" required>
+      <div class="form-row">
+        <label>Upload Image</label>
+        <div class="file-upload">
+          <input type="file" name="image" accept="image/*" required>
+          <div class="file-upload-label">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Click to upload image</p>
+          </div>
+        </div>
+      </div>
 
-      <button type="submit">Submit Recipe</button>
+      <button type="submit" class="submit-btn">Submit Recipe</button>
     </form>
   </div>
 
   <script>
-    // Toggle subcategories
-    document.querySelectorAll('.category-title').forEach(title => {
-      title.addEventListener('click', function() {
+    document.querySelectorAll('.category-header').forEach(header => {
+      header.addEventListener('click', function() {
         this.parentElement.classList.toggle('active');
       });
     });
