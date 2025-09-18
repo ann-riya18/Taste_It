@@ -97,22 +97,23 @@ $result = $conn->query($sql);
     .nav-links ul li a:hover {
       color: #B0C364;
     }
-    /* Dropdown Menu Container */
+    /* Dropdown Menu Container - Enhanced Professional Look */
     .nav-links ul li ul.dropdown-menu {
       display: none;
       position: absolute;
       top: 100%;
       left: 0;
-      background: rgba(255, 255, 255, 0.4); /* light transparent */
+      background: #222; /* Changed to black background */
       padding: 15px;
       list-style: none;
       width: 280px;
       max-height: 400px;
       overflow-y: auto;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      z-index: 999;
-      backdrop-filter: blur(6px); /* subtle blur to enhance transparency */
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+      z-index: 1001; /* Increased z-index */
+      backdrop-filter: blur(10px); /* Stronger blur effect */
+      border: 1px solid #333; /* Dark border */
     }
     /* Show dropdown on hover */
     .nav-links ul li.dropdown:hover ul.dropdown-menu {
@@ -122,32 +123,33 @@ $result = $conn->query($sql);
     .category {
       display: block;
       margin-bottom: 10px;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
+      border-bottom: 1px solid #333; /* Darker border */
       padding-bottom: 6px;
     }
-    /* Category title styling */
+    /* Category title styling - Enhanced */
     .category-title {
       font-family: 'Poppins', sans-serif;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      padding: 8px 12px;
-      color: #B0C364; /* olive green */
-      background: rgba(246, 246, 246, 0.94); /* subtle transparent bg */
-      border-radius: 5px;
+      padding: 10px 14px;
+      color: #fff; /* Changed to white text */
+      background: #000; /* Changed to black background */
+      border-radius: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: background 0.3s ease, color 0.3s ease;
+      transition: all 0.3s ease;
     }
     .category-title:hover {
-      background: rgba(176, 195, 100, 0.15); /* slightly darker transparent bg */
-      color: #566711; /* darker olive green on hover */
+      background: #333; /* Darker gray on hover */
+      color: #fff;
     }
     /* Arrow icon */
     .category-title .arrow {
       font-size: 12px;
       transition: transform 0.3s ease;
+      color: #fff; /* Changed to white */
     }
     .category.open .category-title .arrow {
       transform: rotate(90deg);
@@ -168,36 +170,39 @@ $result = $conn->query($sql);
       max-height: 500px;
       display: block;
     }
-    /* Each subcategory */
+    /* Each subcategory - Enhanced */
     .sub-categories li {
       display: block;
       margin: 4px 0;
     }
     .sub-categories li a {
       display: block;
-      padding: 6px 12px;
+      padding: 8px 14px;
       font-size: 14px;
       text-decoration: none;
-      color: #B0C364; /* olive green text */
+      color: #ddd; /* Light gray text for visibility */
       font-family: 'Poppins', sans-serif;
       border-radius: 4px;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: all 0.2s ease;
       width: 100%;
+      position: relative;
     }
     .sub-categories li a:hover {
-      background: rgba(176, 195, 100, 0.15); /* slightly darker transparent bg */
-      color: #566711; /* darker olive green text */
+      background: rgba(176, 195, 100, 0.2); /* Light brand color background */
+      color: #fff; /* White text on hover */
+      padding-left: 18px; /* Slight indent on hover */
     }
-    /* Optional scrollbar styling for dropdown */
+    /* Enhanced scrollbar styling */
     .nav-links ul li ul.dropdown-menu::-webkit-scrollbar {
-      width: 6px;
+      width: 8px;
     }
     .nav-links ul li ul.dropdown-menu::-webkit-scrollbar-thumb {
-      background: rgba(176, 195, 100, 0.4);
-      border-radius: 3px;
+      background: #666; /* Darker scrollbar thumb */
+      border-radius: 4px;
     }
     .nav-links ul li ul.dropdown-menu::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
+      background: #333; /* Darker scrollbar track */
+      border-radius: 4px;
     }
     .hero{height:100vh;position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden}
     .hero video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
@@ -546,7 +551,7 @@ $result = $conn->query($sql);
 <!-- HERO -->
 <section class="hero">
   <video autoplay muted loop playsinline>
-    <source src="img/bgvideo.mp4" type="video/mp4">
+    <source src="img/bgvideo1.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
     <div class="hero-icon">
@@ -688,31 +693,69 @@ document.querySelectorAll(".category-title").forEach(title => {
       category.classList.toggle("open");
     });
   });
-// existing icons toggle (like/bookmark)
-document.querySelectorAll('.card-icons i').forEach(icon=>{
-  icon.addEventListener('click', function(e){
-    e.preventDefault();
-    const recipeId = this.getAttribute('data-id');
-    const action = this.getAttribute('data-action');
-    fetch('toggle_action.php', {
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body:`id=${recipeId}&action=${action}`
-    }).then(res=>res.json()).then(data=>{
-      if(data.success){
-        if(action==='like'){
-          this.classList.toggle('fa-regular');
-          this.classList.toggle('fa-solid');
-          this.classList.toggle('liked');
-        } else {
-          this.classList.toggle('fa-regular');
-          this.classList.toggle('fa-solid');
-          this.classList.toggle('saved');
-        }
+
+// Check if user is logged in - fixed to use PHP session variable
+const isLoggedIn = <?php echo !empty($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+
+// Handle like and save icons with login check
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.card-icons i').forEach(icon=>{
+    icon.addEventListener('click', function(e){
+      e.preventDefault();
+      
+      // Check if user is logged in
+      if (!isLoggedIn) {
+        // Create a custom notification instead of alert
+        const notification = document.createElement('div');
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.left = '50%';
+        notification.style.transform = 'translateX(-50%)';
+        notification.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        notification.style.color = 'white';
+        notification.style.padding = '12px 24px';
+        notification.style.borderRadius = '30px';
+        notification.style.zIndex = '10000';
+        notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        notification.style.fontFamily = 'Poppins, sans-serif';
+        notification.style.fontSize = '16px';
+        notification.textContent = 'Please log in to save recipes';
+        
+        document.body.appendChild(notification);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          notification.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => notification.remove(), 500);
+        }, 3000);
+        
+        return;
       }
+      
+      const recipeId = this.getAttribute('data-id');
+      const action = this.getAttribute('data-action');
+      fetch('toggle_action.php', {
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:`id=${recipeId}&action=${action}`
+      }).then(res=>res.json()).then(data=>{
+        if(data.success){
+          if(action==='like'){
+            this.classList.toggle('fa-regular');
+            this.classList.toggle('fa-solid');
+            this.classList.toggle('liked');
+          } else {
+            this.classList.toggle('fa-regular');
+            this.classList.toggle('fa-solid');
+            this.classList.toggle('saved');
+          }
+        }
+      });
     });
   });
 });
+
 // Side menu toggle
 const menuToggle = document.querySelector('.menu-toggle');
 const sideMenu = document.getElementById('sideMenu');
