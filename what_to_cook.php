@@ -74,7 +74,7 @@ if (!isset($_SESSION[$session_key]) || isset($_GET['refresh_plan'])) {
         $stmt = $conn->prepare("
             SELECT r.id, r.title, r.image_path, r.description, r.ingredients, r.diet 
             FROM recipes r 
-            WHERE r.course LIKE ? AND r.status = 'approved' 
+            WHERE r.course LIKE ? AND r.status = 'approved' AND (r.diet IS NULL OR r.diet = 1)
             ORDER BY RAND() 
             LIMIT 20
         ");

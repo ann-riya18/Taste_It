@@ -14,6 +14,24 @@ function int_array_for_sql($arr) {
     return $arr ? implode(',', $arr) : '0';
 }
 
+// Helper function to check if recipe has at least two diet values
+function has_multiple_diets($diet_string) {
+    // If diet string is empty or null, return false
+    if (empty($diet_string) || $diet_string === null) return false;
+    
+    // Split diet string by commas and clean up
+    $diet_array = explode(',', $diet_string);
+    $diet_array = array_map('trim', $diet_array);
+    
+    // Remove any empty strings from the array
+    $diet_array = array_filter($diet_array, function($value) {
+        return !empty($value);
+    });
+    
+    // Only return true if there are at least 2 diet values
+    return count($diet_array) >= 2;
+}
+
 // ---------- Main Logic ----------
 // Compute current month/year/week
 $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
@@ -92,8 +110,11 @@ if (!isset($_SESSION[$session_key]) || isset($_GET['refresh_plan'])) {
             $available_recipes = [];
             
             while ($r = $res->fetch_assoc()) {
-                // Include all recipes regardless of diet restrictions
-                if (!in_array((int)$r['id'], $used)) {
+                // Check if recipe has at least two diet values
+                $diet_value = $r['diet'] ?? '';
+                
+                // Only include recipes with two or more diet values
+                if (has_multiple_diets($diet_value) && !in_array((int)$r['id'], $used)) {
                     $available_recipes[] = $r;
                     $used[] = (int)$r['id'];
                     if (count($available_recipes) >= 7) break;

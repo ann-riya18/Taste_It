@@ -34,43 +34,176 @@ $result = $stmt->get_result();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Comments</title>
-    <link rel="stylesheet" href="style.css"> <!-- Your theme CSS -->
-    <style>
-        body { font-family: 'Poppins', sans-serif; margin: 20px; background: #f9f9f9; }
-        h2 { color: #B0C364; text-align: center; }
-        .comment-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; justify-content: start; margin-top: 20px; }
-        .comment-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.2s; padding: 10px; }
-        .comment-card:hover { transform: translateY(-5px); }
-        .comment-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
-        .comment-card h3 { margin: 10px 0 5px 0; color: #B0C364; font-size: 16px; }
-        .comment-card p { font-size: 14px; color: #333; margin: 5px 0; }
-        .comment-card .date { font-size: 12px; color: #777; margin-bottom: 5px; }
-        .comment-card a { display: inline-block; margin-top: 5px; padding: 5px 10px; background: #B0C364; color: #fff; text-decoration: none; border-radius: 5px; font-size: 13px; }
-        .comment-card a:hover { background: #9aa94f; }
-        .no-comments { margin-top: 40px; text-align: center; color: #555; font-size: 16px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Comments</title>
+<link rel="stylesheet" href="style.css"> <!-- Your theme CSS -->
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        background: #f9f9f9;
+    }
+
+    /* Top Panel */
+    .top-panel {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        border-bottom: 2px solid #B0C364;
+        background: #fff;
+        height: 70px;
+    }
+
+    .top-panel h2 {
+        margin: 0;
+        color: #B0C364;
+        font-size: 22px;
+    }
+
+    .top-links {
+        display: flex;
+        gap: 15px;
+    }
+
+    .top-links a {
+        border: 2px solid #B0C364;
+        color: #B0C364;
+        text-decoration: none;
+        padding: 6px 14px;
+        border-radius: 5px;
+        font-size: 14px;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .top-links a:hover {
+        background: #B0C364;
+        color: #fff;
+    }
+
+    /* Main Content */
+    .main-content {
+        padding: 20px 40px;
+    }
+
+    /* Horizontal Comment Card */
+    .comment-card {
+        display: flex;
+        justify-content: space-between;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.2s;
+        margin-bottom: 20px;
+    }
+
+    .comment-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .comment-content {
+        padding: 15px;
+        flex: 1;
+    }
+
+    .comment-content h3 {
+        margin: 0 0 5px 0;
+        color: #B0C364;
+        font-size: 18px;
+    }
+
+    .comment-content p.comment-text {
+        font-size: 14px;
+        color: #333;
+        background: #f0f9e8; /* Highlighted */
+        padding: 10px;
+        border-radius: 5px;
+        margin: 5px 0;
+    }
+
+    .comment-content p.date {
+        font-size: 12px;
+        color: #777;
+        margin-bottom: 10px;
+    }
+
+    .comment-content .actions a {
+        display: inline-block;
+        margin-right: 8px;
+        padding: 6px 12px;
+        border: 2px solid #B0C364;
+        color: #B0C364;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .comment-content .actions a:hover {
+        background: #B0C364;
+        color: #fff;
+    }
+
+    .comment-card img {
+        width: 180px;
+        object-fit: cover;
+    }
+
+    .no-comments {
+        margin-top: 40px;
+        text-align: center;
+        color: #555;
+        font-size: 16px;
+    }
+
+    @media(max-width: 768px){
+        .comment-card {
+            flex-direction: column;
+        }
+        .comment-card img {
+            width: 100%;
+            height: 180px;
+        }
+    }
+</style>
 </head>
 <body>
-    <h2>My Comments</h2>
 
-    <?php if($result->num_rows > 0): ?>
-        <div class="comment-grid">
-            <?php while($row = $result->fetch_assoc()): ?>
-                <div class="comment-card">
-                    <img src="<?= $row['image_path']; ?>" alt="<?= $row['title']; ?>">
-                    <h3><?= $row['title']; ?></h3>
-                    <p><?= substr($row['comment_text'], 0, 100) . '...'; ?></p>
-                    <p class="date"><?= date('d M Y, H:i', strtotime($row['created_at'])); ?></p>
-                    <a href="view_recipe.php?id=<?= $row['recipe_id']; ?>">View Recipe</a>
-                    <a href="comments.php?remove_id=<?= $row['id']; ?>">Delete</a>
-                </div>
-            <?php endwhile; ?>
-        </div>
-    <?php else: ?>
-        <p class="no-comments">You haven’t commented on any recipes yet.</p>
-    <?php endif; ?>
+<!-- Top Panel -->
+<div class="top-panel">
+    <h2>My Comments</h2>
+    <div class="top-links">
+        <a href="index.php">Home</a>
+        <a href="user_dashboard.php">Dashboard</a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+<?php
+if($result->num_rows > 0){
+    while($row = $result->fetch_assoc()){
+        echo '<div class="comment-card">';
+        echo '<div class="comment-content">';
+        echo '<h3>'.$row['title'].'</h3>';
+        echo '<p class="comment-text">'.substr($row['comment_text'],0,150).'...</p>';
+        echo '<p class="date">'.date('d M Y, H:i', strtotime($row['created_at'])).'</p>';
+        echo '<div class="actions">';
+        echo '<a href="view_recipe.php?id='.$row['recipe_id'].'">View Recipe</a>';
+        echo '<a href="comments.php?remove_id='.$row['id'].'">Delete</a>';
+        echo '</div></div>';
+        echo '<img src="'.$row['image_path'].'" alt="'.$row['title'].'">';
+        echo '</div>';
+    }
+}else{
+    echo "<p class='no-comments'>You haven’t commented on any recipes yet.</p>";
+}
+?>
+</div>
+
 </body>
 </html>

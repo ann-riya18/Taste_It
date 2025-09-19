@@ -33,118 +33,174 @@ if (isset($_GET['delete_id'])) {
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            margin: 20px;
-            background: #f8f9fa;
+            margin: 0;
+            background: #f9f9f9;
         }
 
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
+        /* Top Panel */
+        .top-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 2px solid #B0C364;
+            background: #fff;
+            height: 70px;
         }
 
-        .recipe-container {
+        .top-panel h2 {
+            margin: 0;
+            color: #B0C364;
+            font-size: 28px;
+        }
+
+        .top-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .top-links a {
+            border: 2px solid #B0C364;
+            color: #B0C364;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 5px;
+            font-size: 14px;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .top-links a:hover {
+            background: #B0C364;
+            color: #fff;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px 40px;
+        }
+
+        /* Recipe Grid */
+        .recipe-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
-            padding: 10px;
+            margin-top: 20px;
         }
 
         .recipe-card {
-            border-radius: 15px;
             background: #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 15px;
-            text-align: center;
-            transition: transform 0.2s ease-in-out;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
         }
 
         .recipe-card:hover {
             transform: translateY(-5px);
         }
 
+        .recipe-card a.card-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
         .recipe-card img {
             width: 100%;
             height: 180px;
             object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 10px;
         }
 
         .recipe-card h3 {
-            font-size: 18px;
-            margin: 10px 0;
-            color: #333;
+            margin: 10px;
+            color: #B0C364;
         }
 
         .recipe-card p {
+            margin: 10px;
             font-size: 14px;
-            color: #666;
-            margin-bottom: 12px;
+            color: #333;
             min-height: 40px;
         }
 
-        .recipe-actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
+        .recipe-card .actions {
+            margin: 10px;
         }
 
-        .btn {
-            padding: 6px 14px;
-            border-radius: 8px;
+        .recipe-card .actions a {
+            display: inline-block;
+            margin-right: 8px;
+            padding: 6px 12px;
+            border: 2px solid #B0C364;
+            color: #B0C364;
             text-decoration: none;
+            border-radius: 5px;
             font-size: 14px;
-            font-weight: 500;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .recipe-card .actions a:hover {
+            background: #B0C364;
             color: #fff;
-            cursor: pointer;
-            transition: 0.2s;
         }
 
-        .btn-edit {
-            background-color: #B0C364;
-        }
-        .btn-edit:hover {
-            background-color: #9bb050;
-        }
-
-        .btn-delete {
-            background-color: #E74C3C;
-        }
-        .btn-delete:hover {
-            background-color: #c0392b;
+        .no-recipes {
+            margin-top: 40px;
+            text-align: center;
+            color: #555;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
 
-<h2>My Recipes</h2>
-<div class="recipe-container">
-    <?php
-    $user_id = $_SESSION['user_id'];
-    $sql = "SELECT id, title, description, image_path FROM recipes WHERE user_id = $user_id ORDER BY id DESC";
-    $result = $conn->query($sql);
+    <!-- Top Panel -->
+    <div class="top-panel">
+        <h2>My Recipes</h2>
+        <div class="top-links">
+            <a href="index.php">Home</a>
+            <a href="user_dashboard.php">Dashboard</a>
+        </div>
+    </div>
 
-    if ($result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
-            echo '<div class="recipe-card">';
-            echo '<img src="'.$row['image_path'].'" alt="'.$row['title'].'">';
-            echo '<h3>'.$row['title'].'</h3>';
-            echo '<p>'.$row['description'].'</p>';
+    <!-- Main Content -->
+    <div class="main-content">
+        <?php
+        $user_id = $_SESSION['user_id'];
+        $sql = "SELECT id, title, description, image_path 
+                FROM recipes 
+                WHERE user_id = $user_id AND status='approved' 
+                ORDER BY id DESC";
+        $result = $conn->query($sql);
 
-            // Edit & Delete buttons
-            echo '<div class="recipe-actions">';
-            echo '<a href="edit_recipe.php?id='.$row['id'].'" class="btn btn-edit">Edit</a>';
-            echo '<a href="my_recipes.php?delete_id='.$row['id'].'" class="btn btn-delete" onclick="return confirm(\'Are you sure you want to delete this recipe?\');">Delete</a>';
+        if ($result->num_rows > 0) {
+            echo '<div class="recipe-grid">';
+            while($row = $result->fetch_assoc()) {
+                echo '<div class="recipe-card">';
+                
+                // Make image + title + description clickable
+                echo '<a class="card-link" href="view_recipe.php?id='.$row['id'].'">';
+                echo '<img src="'.$row['image_path'].'" alt="'.$row['title'].'">';
+                echo '<h3>'.$row['title'].'</h3>';
+                echo '<p>'.substr($row['description'], 0, 100).'...</p>';
+                echo '</a>';
+
+                // Actions
+                echo '<div class="actions">';
+                echo '<a href="edit_recipe.php?id='.$row['id'].'">Edit</a>';
+                echo '<a href="my_recipes.php?delete_id='.$row['id'].'" onclick="return confirm(\'Are you sure you want to delete this recipe?\');">Delete</a>';
+                echo '</div>';
+
+                echo '</div>';
+            }
             echo '</div>';
-
-            echo '</div>';
+        } else {
+            echo "<p class='no-recipes'>You haven't uploaded any approved recipes yet.</p>";
         }
-    } else {
-        echo "<p style='text-align:center;'>You haven't uploaded any recipes yet.</p>";
-    }
-    ?>
-</div>
+        ?>
+    </div>
 
 </body>
 </html>

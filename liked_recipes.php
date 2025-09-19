@@ -31,51 +31,173 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liked Recipes</title>
-    <link rel="stylesheet" href="style.css"> <!-- Your theme CSS -->
-    <style>
-        body { font-family: 'Poppins', sans-serif; margin: 20px; background: #f9f9f9; }
-        h2 { color: #B0C364; text-align: center; }
-        .recipe-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 cards per row */
-    gap: 20px;
-    justify-content: start; /* Align cards to the left */
-    margin-top: 20px;
-}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liked Recipes</title>
+<link rel="stylesheet" href="style.css"> <!-- Your theme CSS -->
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        background: #f9f9f9;
+    }
 
-        .recipe-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 300px; overflow: hidden; transition: transform 0.2s; }
-        .recipe-card:hover { transform: translateY(-5px); }
-        .recipe-card img { width: 100%; height: 200px; object-fit: cover; }
-        .recipe-card h3 { margin: 10px; color: #B0C364; }
-        .recipe-card p { margin: 10px; font-size: 14px; color: #333; }
-        .recipe-card a { display: inline-block; margin: 10px; padding: 6px 12px; background: #B0C364; color: #fff; text-decoration: none; border-radius: 5px; font-size: 14px; }
-        .recipe-card a:hover { background: #9aa94f; }
-        .no-likes { margin-top: 40px; text-align: center; color: #555; font-size: 16px; }
-    </style>
+    /* Top Panel */
+    .top-panel {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        border-bottom: 2px solid #B0C364;
+        background: #fff;
+        height: 70px;
+    }
+
+    .top-panel h2 {
+        margin: 0;
+        color: #B0C364;
+        font-size: 28px;
+    }
+
+    .top-links {
+        display: flex;
+        gap: 15px;
+    }
+
+    .top-links a {
+        border: 2px solid #B0C364;
+        color: #B0C364;
+        text-decoration: none;
+        padding: 6px 14px;
+        border-radius: 5px;
+        font-size: 14px;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .top-links a:hover {
+        background: #B0C364;
+        color: #fff;
+    }
+
+    /* Main Content */
+    .main-content {
+        padding: 20px 40px;
+    }
+
+    /* Recipe Grid */
+    .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .recipe-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+
+    .recipe-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .recipe-card a.card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .recipe-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .recipe-card h3 {
+        margin: 10px;
+        color: #B0C364;
+    }
+
+    .recipe-card p {
+        margin: 10px;
+        font-size: 14px;
+        color: #333;
+        min-height: 40px;
+    }
+
+    .recipe-card .actions {
+        margin: 10px;
+    }
+
+    .recipe-card .actions a {
+        display: inline-block;
+        margin-right: 8px;
+        padding: 6px 12px;
+        border: 2px solid #B0C364;
+        color: #B0C364;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .recipe-card .actions a:hover {
+        background: #B0C364;
+        color: #fff;
+    }
+
+    .no-likes {
+        margin-top: 40px;
+        text-align: center;
+        color: #555;
+        font-size: 16px;
+    }
+</style>
 </head>
 <body>
-    <h2>Liked Recipes</h2>
 
-    <?php if($result->num_rows > 0): ?>
-        <div class="recipe-grid">
-            <?php while($row = $result->fetch_assoc()): ?>
-                <div class="recipe-card">
-                    <img src="<?= $row['image_path']; ?>" alt="<?= $row['title']; ?>">
-                    <h3><?= $row['title']; ?></h3>
-                    <p><?= substr($row['description'], 0, 100) . '...'; ?></p>
-                    <a href="view_recipe.php?id=<?= $row['id']; ?>">View Recipe</a>
-                    <a href="liked_recipes.php?remove_id=<?= $row['id']; ?>">Remove</a>
-                </div>
-            <?php endwhile; ?>
-        </div>
-    <?php else: ?>
-        <p class="no-likes">You haven’t liked any recipes yet.</p>
-    <?php endif; ?>
+<!-- Top Panel -->
+<div class="top-panel">
+    <h2>Liked Recipes</h2>
+    <div class="top-links">
+        <a href="index.php">Home</a>
+        <a href="user_dashboard.php">Dashboard</a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+<?php
+if($result->num_rows > 0){
+    echo '<div class="recipe-grid">';
+    while($row = $result->fetch_assoc()){
+        echo '<div class="recipe-card">';
+        echo '<a class="card-link" href="view_recipe.php?id='.$row['id'].'">';
+        echo '<img src="'.$row['image_path'].'" alt="'.$row['title'].'">';
+        echo '<h3>'.$row['title'].'</h3>';
+        echo '<p>'.substr($row['description'],0,100).'...</p>';
+        echo '</a>';
+        // Remove action button
+        echo '<div class="actions">';
+        echo '<a href="liked_recipes.php?remove_id='.$row['id'].'">Remove</a>';
+        echo '</div>';
+        echo '</div>';
+    }
+    echo '</div>';
+}else{
+    echo "<p class='no-likes'>You haven’t liked any recipes yet.</p>";
+}
+?>
+</div>
+
 </body>
 </html>
