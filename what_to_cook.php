@@ -76,7 +76,37 @@ for ($i = 0; $i < 7; $i++) {
 }
 
 // Lock logic: Current week is unlocked (offset 0). Next week (offset 1) is ALWAYS blurred/locked.
-$is_locked_view = ($selected_week_offset === 1); 
+// ================================
+// DYNAMIC WEEK LOCK/UNLOCK LOGIC
+// ================================
+
+// Get current system time
+$current_time = time();
+
+// Start of current week (Monday)
+$this_week_monday = strtotime('monday this week', $current_time);
+
+// Define multiple weeks relative to current week
+$weeks = [
+    0 => strtotime('-2 week monday', $this_week_monday), // two weeks ago
+    1 => strtotime('-1 week monday', $this_week_monday), // last week
+    2 => $this_week_monday,                              // current week
+    3 => strtotime('+1 week monday', $this_week_monday), // next week
+];
+
+// Ensure selected week is valid
+$selected_week_offset = isset($_GET['week']) ? (int)$_GET['week'] : 2; // default = current week
+if (!isset($weeks[$selected_week_offset])) $selected_week_offset = 2;
+
+// Week start timestamp for the selected week
+$week_start = $weeks[$selected_week_offset];
+
+// Lock logic:
+//   - All past weeks (week start <= now) are unlocked
+//   - Current week is unlocked
+//   - Future weeks are blurred
+$is_locked_view = ($week_start > $current_time);
+
 
 // Check if user is logged in
 $is_logged_in = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
@@ -638,7 +668,7 @@ function goToGrocery() {
         return;
     }
     // Passing the 'week' offset
-    window.location.href = 'weekly_grocery.php?week=' + SELECTED_WEEK_OFFSET;
+    window.location.href = 'cook_grocery.php?week=' + SELECTED_WEEK_OFFSET;
 }
 
 function goHome(){ 
