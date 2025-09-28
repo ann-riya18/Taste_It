@@ -7,8 +7,24 @@ if ($conn->connect_error) {
 }
 $user_id = $_SESSION['user_id'] ?? 0; // assuming user_id stored in session
 // --- Fetch latest recipes (limit 8 for homepage cards) ---
-$sql = "SELECT id, title, image_path FROM recipes ORDER BY id DESC LIMIT 10";
-$result = $conn->query($sql);
+$sql = "
+    SELECT 
+        r.id, 
+        r.title, 
+        r.image_path,
+        COUNT(l.id) AS likes_count  -- Count records in the likes table
+    FROM 
+        recipes r
+    LEFT JOIN 
+        likes l ON r.id = l.recipe_id
+    WHERE 
+        r.status = 'approved'      -- Filter for approved recipes only
+    GROUP BY 
+        r.id, r.title, r.image_path -- Group by recipe ID to aggregate likes
+    ORDER BY 
+        likes_count DESC, r.created_at DESC -- Order by most likes, then newest creation date as a tiebreaker
+    LIMIT 10                       -- Display only the top 10
+";$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -542,7 +558,11 @@ $result = $conn->query($sql);
             </ul>
           </li>
           <li><a href="#about">About</a></li>
-          <li><a href="login.html">Login</a></li>
+          <?php if (isset($_SESSION['user_id'])): ?>
+          <li><a href="user_dashboard.php">Dashboard</a></li>
+           <?php else: ?>
+         <li><a href="login.html">Login</a></li>
+       <?php endif; ?>
         </ul>
       </nav>
     </div>
