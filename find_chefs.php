@@ -65,7 +65,7 @@ body{margin:0;font-family:'Poppins',sans-serif;display:flex;background:#fefaf3}
 .search-box input{padding:12px 20px;width:300px;border:1px solid #ddd;border-radius:25px;font-size:15px}
 .search-box button{padding:12px 20px;margin-left:10px;background:#B0C364;color:#fff;border:none;border-radius:25px;cursor:pointer}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;margin-top:30px}
-.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 15px rgba(0,0,0,.08);transition:.25s;text-align:center;padding:20px}
+.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 15px rgba(0,0,0,.08);transition:.25s;text-align:center;padding:20px;text-decoration:none;color:inherit;display:block}
 .card:hover{transform:translateY(-6px)}
 .card img{width:100px;height:100px;object-fit:cover;border-radius:50%;margin-bottom:12px}
 .card-title{font-size:18px;color:#333;font-weight:600}
@@ -103,11 +103,13 @@ body{margin:0;font-family:'Poppins',sans-serif;display:flex;background:#fefaf3}
     if ($chefs && $chefs->num_rows > 0) {
       while ($chef = $chefs->fetch_assoc()) {
         $chefImg = !empty($chef['profile_pic']) ? $chef['profile_pic'] : 'uploads/user_images/default.jpg';
+        $chefId  = $chef['id'];
+        $chefName = htmlspecialchars($chef['username']);
         echo "
-        <div class='card'>
-          <img src='".htmlspecialchars($chefImg)."' alt='Chef' onerror=\"this.src='uploads/user_images/default.jpg'\">
-          <div class='card-title'>".htmlspecialchars($chef['username'])."</div>
-        </div>";
+        <a href='profile.php?id={$chefId}' class='card'>
+          <img src='".htmlspecialchars($chefImg)."' alt='{$chefName}' onerror=\"this.src='uploads/user_images/default.jpg'\">
+          <div class='card-title'>{$chefName}</div>
+        </a>";
       }
     } else {
       echo "<p>No chefs found.</p>";
