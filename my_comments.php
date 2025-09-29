@@ -11,11 +11,16 @@ $user_id = $_SESSION['user_id'];
 
 // Remove comment if requested
 if (isset($_GET['remove_id'])) {
-    $remove_id = $_GET['remove_id'];
-    $del_sql = "DELETE FROM comments WHERE id=? AND user_id=?";
-    $del_stmt = $conn->prepare($del_sql);
-    $del_stmt->bind_param("ii", $remove_id, $user_id);
-    $del_stmt->execute();
+    // Sanitize the input to ensure it's an integer
+    $remove_id = filter_var($_GET['remove_id'], FILTER_SANITIZE_NUMBER_INT);
+
+    // The prepared statement already handles SQL injection, but this adds a layer of safety.
+    if ($remove_id) {
+        $del_sql = "DELETE FROM comments WHERE id=? AND user_id=?";
+        $del_stmt = $conn->prepare($del_sql);
+        $del_stmt->bind_param("ii", $remove_id, $user_id);
+        $del_stmt->execute();
+    }
     header("Location: comments.php");
     exit();
 }
@@ -37,8 +42,8 @@ $result = $stmt->get_result();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Comments</title>
-<link rel="stylesheet" href="style.css"> <!-- Your theme CSS -->
-<style>
+<link rel="stylesheet" href="style.css"> <style>
+    /* ... (Your existing CSS here, unchanged) ... */
     body {
         font-family: 'Poppins', sans-serif;
         margin: 0;
@@ -170,10 +175,23 @@ $result = $stmt->get_result();
         }
     }
 </style>
+
+<script>
+/**
+ * Displays a confirmation dialog before proceeding with the comment deletion.
+ * @param {string} deleteUrl The URL to redirect to if the user confirms.
+ * @returns {void}
+ */
+function confirmDelete(deleteUrl) {
+    if (confirm("Are you sure you want to delete this comment? This action cannot be undone.")) {
+        window.location.href = deleteUrl;
+    }
+}
+</script>
+
 </head>
 <body>
 
-<!-- Top Panel -->
 <div class="top-panel">
     <h2>My Comments</h2>
     <div class="top-links">
@@ -182,21 +200,36 @@ $result = $stmt->get_result();
     </div>
 </div>
 
-<!-- Main Content -->
 <div class="main-content">
 <?php
 if($result->num_rows > 0){
     while($row = $result->fetch_assoc()){
+        // Prepare the delete URL for use in the JavaScript function
+        $delete_url = "comments.php?remove_id=" . $row['id'];
+        
         echo '<div class="comment-card">';
         echo '<div class="comment-content">';
         echo '<h3>'.$row['title'].'</h3>';
-        echo '<p class="comment-text">'.substr($row['comment_text'],0,150).'...</p>';
+        
+        // Note: Consider displaying the full comment text or providing a "Read More"
+        // as truncating to 150 chars might cut off mid-word.
+        // For now, keeping your original truncation:
+        $comment_display = strlen($row['comment_text']) > 150 ? 
+                           substr($row['comment_text'], 0, 150) . '...' :
+                           $row['comment_text'];
+
+        echo '<p class="comment-text">'.htmlentities($comment_display).'</p>';
         echo '<p class="date">'.date('d M Y, H:i', strtotime($row['created_at'])).'</p>';
         echo '<div class="actions">';
         echo '<a href="view_recipe.php?id='.$row['recipe_id'].'">View Recipe</a>';
-        echo '<a href="comments.php?remove_id='.$row['id'].'">Delete</a>';
+        
+        // REPLACED THE DIRECT LINK WITH A JAVASCRIPT FUNCTION CALL
+        // Note: The 'return false;' is no longer strictly necessary since 'href' is '#'
+        // and the action is controlled by the JS function.
+        echo '<a href="#" onclick="confirmDelete(\''.$delete_url.'\'); return false;">Delete</a>';
+        
         echo '</div></div>';
-        echo '<img src="'.$row['image_path'].'" alt="'.$row['title'].'">';
+        echo '<img src="'.htmlentities($row['image_path']).'" alt="'.htmlentities($row['title']).'">';
         echo '</div>';
     }
 }else{
