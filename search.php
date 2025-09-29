@@ -77,7 +77,7 @@ elseif (!empty($timeFilter)) {
         SELECT r.id, r.title, r.description, r.image_path, u.username
         FROM recipes r 
         JOIN users u ON r.user_id = u.id
-        WHERE r.cooking_time <= ? 
+        WHERE r.quick_recipe <= ? 
         AND r.status = 'approved'
         ORDER BY r.id DESC
     ");
@@ -110,7 +110,7 @@ else {
       background:#f9f9f9;
       color:#222;
       overflow-x:hidden;
-      background-image: url('img/bg20.jpg');
+      background-image: url('img/bg23.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
