@@ -7,94 +7,157 @@ if (!isset($_SESSION['admin_email'])) {
 }
 
 // Database connection
-// IMPORTANT: In a real-world scenario, you should use a configuration file and PDO/prepared statements for security.
 $conn = new mysqli("localhost", "root", "", "tasteit");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch approved recipes with the username of the submitter
-// This query is inherently vulnerable to SQL Injection, which should be fixed with prepared statements in a production environment.
-$result = $conn->query("SELECT r.id, r.title, r.image_path, u.username FROM recipes r JOIN users u ON r.user_id = u.id WHERE status = 'approved'");
+// Handle search
+$search = "";
+$whereClause = "WHERE r.status = 'approved'";
+if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
+    $search = trim($_GET['search']);
+    $safeSearch = $conn->real_escape_string($search);
+    $whereClause .= " AND (r.title LIKE '%$safeSearch%' OR u.username LIKE '%$safeSearch%')";
+}
 
-// Close connection
-$conn->close();
+// Fetch approved recipes with username
+$query = "
+    SELECT r.id, r.title, r.image_path, u.username 
+    FROM recipes r 
+    JOIN users u ON r.user_id = u.id 
+    $whereClause
+";
+$result = $conn->query($query);
+
+// Close connection later after HTML
 ?>
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Approved Recipes</title>
     <style>
         :root {
-            /* Define the primary color based on the request */
-            --primary-color: #b0c364;
+            --primary-color: #B0C364;
             --text-color: #333;
-            --link-color: #b0c364;
             --background-light: #f9f9f9;
             --background-white: #fff;
+            --font-main: 'Poppins', sans-serif;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            margin: 0; /* Remove default body margin */
+            font-family: var(--font-main);
+            margin: 0;
             padding: 0;
             background: var(--background-light);
             color: var(--text-color);
         }
 
-        /* Fixed Header Panel */
+        /* Header Panel */
         .header-panel {
-            position: sticky; /* Fixed header */
+            position: sticky;
             top: 0;
-            z-index: 1000; /* Ensure it stays on top */
+            z-index: 1000;
             background: var(--background-white);
             padding: 15px 40px;
             border-bottom: 2px solid var(--primary-color);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
         .header-panel h2 {
             margin: 0;
-            color: var(--link-color);
+            color: var(--primary-color);
             font-size: 1.8em;
         }
 
-        /* Recipe Grid Container */
-        .recipe-grid {
-            padding: 20px 40px; /* Add padding to the main content area */
-            display: grid;
-            /* Create a grid with 6 columns of equal width */
-            grid-template-columns: repeat(6, 1fr);
-            gap: 20px; /* Space between grid items */
+        /* Top Right Buttons */
+        .top-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
         }
 
-        /* Individual Recipe Card Style */
+        .top-buttons button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 0.9em;
+            transition: background 0.3s ease;
+        }
+
+        .top-buttons button:hover {
+            background: #9bb256;
+        }
+
+        /* Search Box */
+        .search-box {
+            display: none;
+            position: absolute;
+            top: 45px;
+            right: 0;
+            background: var(--background-white);
+            padding: 10px;
+            border: 1px solid var(--primary-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-box input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 200px;
+            font-family: var(--font-main);
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px var(--primary-color);
+        }
+
+        /* Recipe Grid */
+        .recipe-grid {
+            padding: 20px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
         .card {
             background: var(--background-white);
-            border: 2px solid var(--primary-color); /* Outline with #b0c364 */
+            border: 2px solid var(--primary-color);
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+            color: inherit;
+            overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
-            overflow: hidden; /* Keep content within the card */
-            text-decoration: none; /* Remove underline from the link */
-            color: inherit; /* Inherit text color */
-            display: flex; /* Flex container for content */
-            flex-direction: column;
-            text-align: center;
         }
 
-        /* Hover effect for interaction */
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         }
 
         .card-image-container {
             width: 100%;
-            padding-top: 60%; /* 5:3 Aspect Ratio for the image area */
+            padding-top: 60%;
             position: relative;
             overflow: hidden;
             border-bottom: 1px solid #eee;
@@ -102,31 +165,22 @@ $conn->close();
 
         .card img {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Crop and center the image */
-            border-radius: 8px 8px 0 0;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
         }
 
         .card-content {
             padding: 15px;
-            flex-grow: 1; /* Allow content to grow to fill space */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            text-align: center;
         }
 
         .card h3 {
-            margin-top: 0;
-            margin-bottom: 5px;
-            color: var(--link-color);
+            margin: 0 0 5px;
+            color: var(--primary-color);
             font-size: 1.1em;
-            line-height: 1.3;
-            /* Truncate title if it's too long */
-            overflow: hidden;
             white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
         }
 
@@ -136,10 +190,9 @@ $conn->close();
             color: #777;
         }
 
-        /* Message for no recipes */
         .no-recipes {
-            padding: 20px 40px;
             text-align: center;
+            padding: 40px;
             font-size: 1.1em;
             color: #777;
         }
@@ -147,31 +200,53 @@ $conn->close();
 </head>
 <body>
 
-    <div class="header-panel">
-        <h2> Approved Recipes</h2>
+<div class="header-panel">
+    <h2>Approved Recipes</h2>
+    <div class="top-buttons">
+        <button id="searchToggle">Search</button>
+        <button onclick="window.location.href='admin_dashboard.php'">Dashboard </button>
+        <div id="searchBox" class="search-box">
+            <form method="GET" action="">
+                <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search recipe or chef...">
+            </form>
+        </div>
     </div>
-    <div class="recipe-grid">
-        <?php if ($result && $result->num_rows > 0): ?>
-            <?php while ($row = $result->fetch_assoc()): ?>
-                <a class="card" href="view_recipe.php?id=<?php echo htmlspecialchars($row['id']); ?>">
-                    <div class="card-image-container">
-                        <?php if (!empty($row['image_path'])): ?>
-                            <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
-                        <?php else: ?>
-                            <img src="placeholder.jpg" alt="No Image Available">
-                        <?php endif; ?>
-                    </div>
-                    
-                    <div class="card-content">
-                        <h3><?php echo htmlspecialchars($row['title']); ?></h3>
-                        <p><strong>By:</strong> <?php echo htmlspecialchars($row['username']); ?></p>
-                    </div>
-                </a>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <div class="no-recipes">No approved recipes yet.</div>
-        <?php endif; ?>
-    </div>
+</div>
+
+<div class="recipe-grid">
+    <?php if ($result && $result->num_rows > 0): ?>
+        <?php while ($row = $result->fetch_assoc()): ?>
+            <a class="card" href="view_recipe.php?id=<?php echo htmlspecialchars($row['id']); ?>">
+                <div class="card-image-container">
+                    <?php if (!empty($row['image_path'])): ?>
+                        <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
+                    <?php else: ?>
+                        <img src="placeholder.jpg" alt="No Image Available">
+                    <?php endif; ?>
+                </div>
+                <div class="card-content">
+                    <h3><?php echo htmlspecialchars($row['title']); ?></h3>
+                    <p><strong>By:</strong> <?php echo htmlspecialchars($row['username']); ?></p>
+                </div>
+            </a>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <div class="no-recipes">No approved recipes found.</div>
+    <?php endif; ?>
+</div>
+
+<script>
+    const searchToggle = document.getElementById('searchToggle');
+    const searchBox = document.getElementById('searchBox');
+    searchToggle.addEventListener('click', () => {
+        searchBox.style.display = (searchBox.style.display === 'block') ? 'none' : 'block';
+        if (searchBox.style.display === 'block') {
+            searchBox.querySelector('input').focus();
+        }
+    });
+</script>
 
 </body>
 </html>
+
+<?php $conn->close(); ?>
