@@ -1,7 +1,14 @@
 <?php
 session_start();
+// Disable caching
+header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
 if (!isset($_SESSION['admin_email'])) {
-    header("Location: admin_login.html");
+    header("Location:login.html");
     exit();
 }
 
@@ -17,7 +24,7 @@ $userCount = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()[
 $chefCount = $conn->query("SELECT COUNT(DISTINCT user_id) AS chefs FROM recipes WHERE status='approved'")->fetch_assoc()['chefs'];
 $approvedRecipes = $conn->query("SELECT COUNT(*) AS total FROM recipes WHERE status='approved'")->fetch_assoc()['total'];
 $pendingRecipes = $conn->query("SELECT COUNT(*) AS total FROM recipes WHERE status='pending'")->fetch_assoc()['total'];
-$declinedRecipes = $conn->query("SELECT COUNT(*) AS total FROM recipes WHERE status='declined'")->fetch_assoc()['total'];
+$declinedRecipes = $conn->query("SELECT COUNT(*) AS total FROM recipes WHERE status='rejected'")->fetch_assoc()['total'];
 
 // Most liked from approved
 $mostLiked = $conn->query("SELECT title, likes FROM recipes WHERE status='approved' ORDER BY likes DESC LIMIT 1")->fetch_assoc();
@@ -403,7 +410,6 @@ $topUsers = $topUsersQuery->fetch_all(MYSQLI_ASSOC);
         
         <div class="sidebar-nav">
             <a href="index.php"><i class="fas fa-home"></i> Home</a>
-            <a href="review_comments.php"><i class="fas fa-comment-dots"></i> Moderate Comments</a>
             <a href="graph_insights.php"><i class="fas fa-chart-line"></i> Graphical Insights</a>
             <a href="admin_logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
@@ -488,5 +494,8 @@ $topUsers = $topUsersQuery->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
     </div>
+    
+
+
 </body>
 </html>

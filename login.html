@@ -66,9 +66,19 @@
 
   <div class="login-choice-box">
     <h2>Login As</h2>
-    <a href="user_login.html"><i class="fa fa-user"></i> Registered User</a>
-    <a href="admin_login.html"><i class="fa fa-lock"></i> Admin</a>
+    <a href="user_login.php"><i class="fa fa-user"></i> Registered User</a>
+    <a href="admin_login.php"><i class="fa fa-lock"></i> Admin</a>
   </div>
+
+<script>
+// If the user hits back after logout, send them away
+window.history.pushState(null, null, window.location.href);
+window.onpopstate = function() {
+    // Redirect back to homepage if trying to go back
+    window.location.href = 'login.html';
+};
+</script>
+
 
 </body>
 </html>

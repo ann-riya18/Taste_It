@@ -1,6 +1,14 @@
 <?php
 session_start();
 
+// Prevent caching — this ensures that after logout, going "back" doesn’t reopen the dashboard.
+header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+// Redirect if session expired or user not logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: user_login.php");
     exit();
@@ -23,8 +31,8 @@ if ($result && $result->num_rows === 1) {
     $user = $result->fetch_assoc();
     $username = $user['username'];
     $profileImage = !empty($user['profile_pic']) 
-    ? $user['profile_pic'] 
-    : 'uploads/user_images/default.jpg';
+        ? $user['profile_pic'] 
+        : 'uploads/user_images/default.jpg';
 } else {
     session_destroy();
     header("Location: user_login.php");
@@ -48,7 +56,6 @@ if ($result && $result->num_rows === 1) {
         background: #fefaf3;
     }
 
-    /* Sidebar */
     .sidebar {
         width: 240px;
         background-color: #fff;
@@ -59,7 +66,6 @@ if ($result && $result->num_rows === 1) {
         display: flex;
         flex-direction: column;
         align-items: center;
-        /* The border is moved to the .main element for a clean join */
     }
 
     .profile-pic {
@@ -103,12 +109,11 @@ if ($result && $result->num_rows === 1) {
         color: #fff;
     }
 
-    /* Main content */
     .main {
         flex-grow: 1;
         background: url('img/bg20.jpg') center/cover no-repeat;
         position: relative;
-        border-left: 2px solid #B0C364; /* This creates the vertical separation */
+        border-left: 2px solid #B0C364;
     }
 
     .main::before {
@@ -118,21 +123,19 @@ if ($result && $result->num_rows === 1) {
         left: 0; 
         right: 0; 
         bottom: 0;
-        background: rgba(255,255,255,0.45); /* low transparent white */
+        background: rgba(255,255,255,0.45);
         z-index: 1;
     }
 
-    /* Top panel */
     .top-panel {
         position: relative;
         background-color: #fff;
         border-bottom: 2px solid #B0C364;
         padding: 20px 60px;
-        text-align: left;
         display: flex;
         align-items: center;
         height: 80px;
-        z-index: 2; /* Ensure the top panel is above the main overlay */
+        z-index: 2;
     }
 
     .top-panel h2 {
@@ -142,12 +145,11 @@ if ($result && $result->num_rows === 1) {
         margin: 0;
     }
 
-    /* Caption styling */
     .caption {
         text-align: center;
         padding: 20px;
         position: relative;
-        z-index: 2; /* Ensure the caption is above the overlay */
+        z-index: 2;
         color: #B0C364;
         font-size: 20px;
         font-weight: 500;
@@ -257,6 +259,18 @@ if ($result && $result->num_rows === 1) {
             </a>
         </div>
     </div>
+
+<script>
+// ✅ This ensures the dashboard never shows from cache when you go "Back" after logout
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) {
+        window.location.href = "user_login.php";
+    }
+    if (performance.getEntriesByType("navigation")[0].type === "back_forward") {
+        window.location.href = "user_login.php";
+    }
+});
+</script>
 
 </body>
 </html>
