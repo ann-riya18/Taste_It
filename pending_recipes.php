@@ -18,11 +18,12 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     $action = $_GET['action'];
 
     if ($action === 'approve') {
-        $stmt = $conn->prepare("UPDATE recipes SET status='approved' WHERE id=?");
+        $stmt = $conn->prepare("UPDATE recipes SET status='approved', updated_at=NOW() WHERE id=?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
     } elseif ($action === 'decline') {
-        $stmt = $conn->prepare("UPDATE recipes SET status='declined' WHERE id=?");
+        // 👇 change 'declined' → 'rejected' for consistency and add updated_at
+        $stmt = $conn->prepare("UPDATE recipes SET status='rejected', updated_at=NOW() WHERE id=?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
     }
@@ -54,13 +55,13 @@ if ($conn->ping()) {
     <title>Pending Recipes</title>
     <style>
         :root {
-            --primary-color: #B0c364;
-            --accent-color: #b0c364;
+            --primary-color: #B0C364;
+            --accent-color: #B0C364;
             --card-outline-color: #5bb84dff;
             --background-body: #FFFFFF;
             --text-dark: #333;
             --text-medium: #555;
-            --font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            --font-family: 'Poppins', sans-serif;
         }
 
         body {
@@ -71,7 +72,6 @@ if ($conn->ping()) {
             line-height: 1.6;
         }
 
-        /* Header with Dashboard Button */
         .header-line {
             display: flex;
             justify-content: space-between;
@@ -102,7 +102,6 @@ if ($conn->ping()) {
             background-color: var(--accent-color);
         }
 
-        /* Recipe Card Styling */
         .recipe {
             display: flex;
             justify-content: space-between;
@@ -126,7 +125,6 @@ if ($conn->ping()) {
 
         .recipe-details h3 {
             color: var(--primary-color);
-            margin-top: 0;
             font-size: 1.6em;
             margin-bottom: 10px;
         }
@@ -144,8 +142,7 @@ if ($conn->ping()) {
         .image-container {
             width: 250px;
             height: 250px;
-            flex-shrink: 0; 
-            position: relative;
+            flex-shrink: 0;
         }
 
         .recipe img {
@@ -165,7 +162,7 @@ if ($conn->ping()) {
             text-decoration: none;
             padding: 10px 22px;
             margin-right: 15px;
-            border-radius: 25px; 
+            border-radius: 25px;
             font-weight: 600;
             transition: opacity 0.2s, transform 0.2s;
             text-transform: uppercase;
@@ -202,19 +199,19 @@ if ($conn->ping()) {
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="recipe">
             <div class="recipe-details">
-                <h3><?php echo htmlspecialchars($row['title']); ?></h3>
-                <p><strong>By:</strong> <?php echo htmlspecialchars($row['username']); ?></p>
-                <p><strong>Ingredients:</strong><br><?php echo nl2br(htmlspecialchars($row['ingredients'])); ?></p>
-                <p><strong>Steps:</strong><br><?php echo nl2br(htmlspecialchars($row['steps'])); ?></p>
+                <h3><?= htmlspecialchars($row['title']); ?></h3>
+                <p><strong>By:</strong> <?= htmlspecialchars($row['username']); ?></p>
+                <p><strong>Ingredients:</strong><br><?= nl2br(htmlspecialchars($row['ingredients'])); ?></p>
+                <p><strong>Steps:</strong><br><?= nl2br(htmlspecialchars($row['steps'])); ?></p>
                 <div class="actions">
-                    <a href="?action=approve&id=<?php echo htmlspecialchars($row['id']); ?>" class="approve">Approve</a>
-                    <a href="?action=decline&id=<?php echo htmlspecialchars($row['id']); ?>" class="decline">Decline</a>
+                    <a href="?action=approve&id=<?= htmlspecialchars($row['id']); ?>" class="approve">Approve</a>
+                    <a href="?action=decline&id=<?= htmlspecialchars($row['id']); ?>" class="decline">Decline</a>
                 </div>
             </div>
 
             <?php if (!empty($row['image_path'])): ?>
                 <div class="image-container">
-                    <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
+                    <img src="<?= htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
                 </div>
             <?php endif; ?>
         </div>
@@ -225,3 +222,4 @@ if ($conn->ping()) {
 
 </body>
 </html>
+

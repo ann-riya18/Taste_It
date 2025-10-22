@@ -1,35 +1,32 @@
 <?php
 session_start();
-// Check if the admin is logged in, redirect if not
+
+// ✅ Check if admin is logged in
 if (!isset($_SESSION['admin_email'])) {
     header("Location: admin_login.html");
     exit();
 }
 
-// Database connection
-// SECURITY NOTE: Please use prepared statements (PDO or mysqli) for production code!
+// ✅ Database connection
 $conn = new mysqli("localhost", "root", "", "tasteit");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// 🔥 Auto delete rejected recipes older than 1 day
-// This query is fine for this purpose, but using prepared statements for deletes is safer in general.
-$conn->query("DELETE FROM recipes WHERE status='rejected' AND TIMESTAMPDIFF(DAY, updated_at, NOW()) >= 1");
+// 🧹 Auto delete rejected recipes older than 1 day
+$conn->query("DELETE FROM recipes WHERE status='rejected' AND updated_at IS NOT NULL AND TIMESTAMPDIFF(DAY, updated_at, NOW()) >= 1");
 
-// Fetch remaining rejected recipes
-$sql = "SELECT r.id, r.title, r.description, r.category, r.image_path, u.username 
-        FROM recipes r 
-        JOIN users u ON r.user_id = u.id 
-        WHERE r.status = 'rejected'";
+// 🧾 Fetch all currently rejected recipes
+$sql = "SELECT r.id, r.title, r.description, r.image_path, u.username 
+        FROM recipes r
+        JOIN users u ON r.user_id = u.id
+        WHERE r.status = 'rejected'
+        ORDER BY r.updated_at DESC";
+
 $result = $conn->query($sql);
 
 if ($result === false) {
-    die("Error executing query: " . $conn->error);
-}
-
-if ($conn->ping()) {
-    $conn->close();
+    die('Error fetching data: ' . $conn->error);
 }
 ?>
 <!DOCTYPE html>
@@ -38,15 +35,14 @@ if ($conn->ping()) {
     <meta charset="UTF-8">
     <title>Declined Recipes</title>
     <style>
-        /* Define Theme Colors - Using a Red/Maroon theme for 'Declined' */
         :root {
-            --theme-color: #B0c364; /* Crimson/Firebrick for 'Declined' */
-            --accent-color: #b0c364; /* Specific outline color requested */
-            --card-outline-color: #A0522D; /* Subtle brown/sienna for professional outline */
-            --background-body: #FFFFFF; /* Pure White Background */
+            --theme-color: #B0C364;
+            --accent-color: #B0C364;
+            --card-outline-color: #A0522D;
+            --background-body: #FFFFFF;
             --text-dark: #333;
             --text-medium: #555;
-            --font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            --font-family: 'Poppins', sans-serif;
         }
 
         body {
@@ -57,7 +53,6 @@ if ($conn->ping()) {
             line-height: 1.6;
         }
 
-        /* Heading Style */
         h2 {
             color: var(--theme-color);
             font-size: 2.2em;
@@ -67,17 +62,15 @@ if ($conn->ping()) {
             margin-bottom: 30px;
         }
 
-        /* Recipe Card Styling (Similar to Pending) */
         .card {
             display: flex;
             justify-content: space-between;
             gap: 30px;
-            background: #FFFFFF;
+            background: #fff;
             padding: 25px;
             margin-bottom: 25px;
             border-radius: 12px;
-            /* Extended card outline with theme color */
-            border: 1px solid var(--card-outline-color); 
+            border: 1px solid var(--card-outline-color);
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
             transition: box-shadow 0.3s ease;
         }
@@ -87,12 +80,11 @@ if ($conn->ping()) {
         }
 
         .recipe-details {
-            flex-grow: 1; /* Allows details to take up remaining space */
+            flex-grow: 1;
         }
 
         .recipe-details h3 {
             color: var(--theme-color);
-            margin-top: 0;
             font-size: 1.6em;
             margin-bottom: 10px;
         }
@@ -106,7 +98,7 @@ if ($conn->ping()) {
         .recipe-details strong {
             color: var(--text-dark);
         }
-        
+
         .decline-note {
             color: var(--theme-color);
             font-weight: 700;
@@ -115,27 +107,21 @@ if ($conn->ping()) {
             border-top: 1px dashed #DDD;
         }
 
-        /* Image Container on the Right */
         .image-container {
-            width: 250px; /* Increased size */
-            height: 250px; /* Increased size */
+            width: 250px;
+            height: 250px;
             flex-shrink: 0;
-            position: relative;
         }
-        
-        /* Circular Image Style */
+
         .card img {
             width: 100%;
             height: 100%;
-            border-radius: 50%; /* Makes the image circular */
+            border-radius: 50%;
             object-fit: cover;
-            /* Circular outline with requested accent color */
-            border: 4px solid var(--accent-color); 
-            box-shadow: 0 0 0 8px rgba(176, 195, 100, 0.2); 
-            margin: 0; /* Remove default margin */
+            border: 4px solid var(--accent-color);
+            box-shadow: 0 0 0 8px rgba(176, 195, 100, 0.2);
         }
 
-        /* Style for No Declined Recipes */
         .no-recipes {
             font-size: 1.2em;
             color: #777;
@@ -144,10 +130,10 @@ if ($conn->ping()) {
             background: #fff;
             border: 2px solid #EEE;
             border-radius: 10px;
-            /* Subtle themed border */
-            border-left: 10px solid var(--theme-color); 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 10px solid var(--theme-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         }
+
         .no-recipes strong {
             color: var(--theme-color);
             display: block;
@@ -156,33 +142,28 @@ if ($conn->ping()) {
     </style>
 </head>
 <body>
-    
-    <h2> Declined Recipes</h2>
+    <h2>Declined Recipes</h2>
 
     <?php if ($result->num_rows > 0): ?>
         <?php while ($row = $result->fetch_assoc()): ?>
             <div class="card">
                 <div class="recipe-details">
-                    <h3><?php echo htmlspecialchars($row['title']); ?></h3>
-                    <p><strong>By:</strong> <?php echo htmlspecialchars($row['username']); ?></p>
-                    <p><strong>Category:</strong> <?php echo htmlspecialchars($row['category']); ?></p>
-                    <p><?php echo nl2br(htmlspecialchars($row['description'])); ?></p>
-                    
-                    <p class="decline-note">This recipe was permanently archived after 1 day.</p>
+                    <h3><?= htmlspecialchars($row['title']); ?></h3>
+                    <p><strong>By:</strong> <?= htmlspecialchars($row['username']); ?></p>
+                    <p><?= nl2br(htmlspecialchars($row['description'])); ?></p>
+                    <p class="decline-note">This recipe was declined and will be removed automatically after 1 day.</p>
                 </div>
-
                 <?php if (!empty($row['image_path'])): ?>
                     <div class="image-container">
-                        <img src="<?php echo htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
+                        <img src="<?= htmlspecialchars($row['image_path']); ?>" alt="Recipe Image">
                     </div>
                 <?php endif; ?>
             </div>
         <?php endwhile; ?>
     <?php else: ?>
         <div class="no-recipes">
-            All reviews are up to date! There are no recipes currently marked as declined.
+            All reviews are up to date! <strong>No recipes are currently marked as declined.</strong>
         </div>
     <?php endif; ?>
-
 </body>
 </html>
