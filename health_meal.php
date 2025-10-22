@@ -32,7 +32,6 @@ $next_monday_date = (clone $current_monday_date)->modify('+7 days');
 $next_week_start = $next_monday_date->format('Y-m-d');
 
 // Week 0 / Week 1 / Week 2 dates
-// Adjust these according to your calendar logic
 $week0_start = (clone $current_monday_date)->modify('-7 days')->format('Y-m-d'); // previous week
 $week1_start = $current_week_start; // current week
 $week2_start = $next_week_start; // upcoming week
@@ -61,10 +60,8 @@ $is_locked_view = false;
 $now = new DateTime();
 
 if ($selected_week === 'week0' || $selected_week === 'week1') {
-    // Completed weeks always unlocked
     $is_locked_view = false;
 } elseif ($selected_week === 'week2') {
-    // Unlock Sunday 3 PM before the week starts
     $unlock_datetime = new DateTime(date('Y-m-d', strtotime($week2_start . ' -1 day')) . ' 15:00:00');
     $is_locked_view = ($now < $unlock_datetime);
 }
@@ -217,27 +214,13 @@ $is_current_week_locked_for_display = false;
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>What to Cook — Health Focus | TasteIt</title>
-<!-- Google Fonts & Font Awesome -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<!-- STYLES (All original preserved) -->
 <style>
-:root{
-    --primary:#b0c364; --primary-dark:#b0c364;
-    --muted:#777; --white: #fff;
-}
-*{box-sizing:border-box}
-body{
-    margin:0; font-family:'Poppins',sans-serif;
-    background: url('img/bg26.jpg') center/cover no-repeat fixed;
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-}
-.app-overlay {
-    background: rgba(255,255,255,0.62);
-    min-height:100vh;
-    display:flex;
-    overflow:auto;
-}
+/* --- All your original styles preserved exactly --- */
+:root{ --primary:#b0c364; --primary-dark:#b0c364; --muted:#777; --white: #fff; }
+*{box-sizing:border-box} body{ margin:0; font-family:'Poppins',sans-serif; background: url('img/bg26.jpg') center/cover no-repeat fixed; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+.app-overlay { background: rgba(255,255,255,0.62); min-height:100vh; display:flex; overflow:auto; }
 .left-bar { position: fixed; top:0; left:0; width:72px; height:100vh; background:var(--white); border-right:1px solid #eee; display:flex; flex-direction:column; align-items:center; padding:30px 8px; gap:14px; z-index:100;}
 .brand { font-weight:700; color:var(--primary); font-size:14px; margin-bottom:8px; text-align:center; width:100%; }
 .icon-btn { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--primary); cursor:pointer; position:relative; background:transparent; border:none; font-size:18px;}
@@ -277,15 +260,7 @@ body{
 .locked-card { filter: blur(6px); opacity:0.8; pointer-events:none; user-select:none; }
 .locked-card a { pointer-events:none; }
 .day-sep { height:8px; border-bottom:1px solid #eee; margin-top:12px; }
-@media (max-width: 980px) {
-    .cards-row { flex-direction:column; }
-    .day-label { width:auto; }
-    .left-bar { display:none; }
-    .main { padding:14px; margin-left:0; }
-    .top-panel { flex-direction:column; gap:15px; }
-    .title-section { text-align:center; }
-    .weeks-section { justify-content:center; }
-}
+@media (max-width: 980px) { .cards-row { flex-direction:column; } .day-label { width:auto; } .left-bar { display:none; } .main { padding:14px; margin-left:0; } .top-panel { flex-direction:column; gap:15px; } .title-section { text-align:center; } .weeks-section { justify-content:center; } }
 </style>
 </head>
 <body>
@@ -321,29 +296,28 @@ body{
                     <div class="day-date"><?php echo date('M j', strtotime($day));?></div>
                 </div>
                 <div class="cards-row">
-                    <?php foreach ($courses as $course):
-                        $meal = $meal_plan[$day][$course];
-                        $done = is_done($session_key,$day,$course);
-                        $locked_class = $is_locked_view ? 'locked-card' : '';
-                    ?>
-                    <div class="card <?php echo $locked_class;?>">
-                        <span class="course-pill"><?php echo htmlspecialchars($course);?></span>
-                        <div class="img-wrap"><img src="<?php echo htmlspecialchars($meal['image_path']);?>" alt="<?php echo htmlspecialchars($meal['title']);?>"></div>
-                        <div class="card-body">
-                            <h3 class="card-title"><?php echo htmlspecialchars($meal['title']);?></h3>
-                            <?php if(!empty($meal['username'])): ?>
-                                <div class="chef-name">By <?php echo htmlspecialchars($meal['username']);?></div>
-                            <?php endif; ?>
-                        </div>
-                        <?php if ($is_logged_in && !$is_locked_view): ?>
-                        <div class="done-box">
-                            <input type="checkbox" class="custom-checkbox" <?php echo $done?'checked':'';?> onchange="markDone('<?php echo $day;?>','<?php echo $course;?>',this.checked)">
-                        </div>
+                <?php foreach ($courses as $course):
+                    $meal = $meal_plan[$day][$course];
+                    $done = is_done($session_key,$day,$course);
+                    $locked_class = $is_locked_view ? 'locked-card' : '';
+                ?>
+                <a href="view_recipe.php?id=<?php echo $meal['id']; ?>" class="card <?php echo $locked_class;?>">
+                    <span class="course-pill"><?php echo htmlspecialchars($course);?></span>
+                    <div class="img-wrap"><img src="<?php echo htmlspecialchars($meal['image_path']);?>" alt="<?php echo htmlspecialchars($meal['title']);?>"></div>
+                    <div class="card-body">
+                        <h3 class="card-title"><?php echo htmlspecialchars($meal['title']);?></h3>
+                        <?php if(!empty($meal['username'])): ?>
+                            <div class="chef-name">By <?php echo htmlspecialchars($meal['username']);?></div>
                         <?php endif; ?>
                     </div>
-                    <?php endforeach; ?>
+                    <?php if ($is_logged_in && !$is_locked_view): ?>
+                    <div class="done-box" onclick="event.stopPropagation();">
+                        <input type="checkbox" class="custom-checkbox" <?php echo $done?'checked':'';?> onchange="markDone('<?php echo $day;?>','<?php echo $course;?>',this.checked)">
+                    </div>
+                    <?php endif; ?>
+                </a>
+                <?php endforeach; ?>
                 </div>
-                <div class="day-sep"></div>
             </div>
         <?php endforeach; ?>
     </div>
